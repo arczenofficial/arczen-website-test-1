@@ -129,6 +129,11 @@ const handleRoute = async () => {
                 const { renderUserManagementUI } = await import('./user-management.js');
                 renderUserManagementUI();
                 break;
+            case '#import-csv':
+                if (!canAccess('system-settings')) { denyAccess('System Settings'); break; }
+                const { renderBulkImportPage } = await import('./import-csv.js');
+                renderBulkImportPage();
+                break;
             case '#store-customers':
                 // Store customer analytics — founders only
                 if (!canAccess('customers')) { denyAccess('Customer Analytics'); break; }

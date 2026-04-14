@@ -1521,7 +1521,7 @@ import CartDrawer from '../../components/CartDrawer.astro';
 <div id="receipt-print-wrapper" class="print-only" style="display:none;"></div>
 
 <Footer />
-<style>
+<style is:global>
     @media print {
         #receipt-print-wrapper { display: block !important; }
     }

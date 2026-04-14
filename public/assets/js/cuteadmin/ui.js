@@ -54,6 +54,7 @@ function buildArchitectureNav(role, userProfile) {
         <p class="nav-section-label" style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin: 0 12px 8px; font-weight: 800;">Architecture</p>
         <a href="#users" class="nav-item"><i class="ph ph-users-three"></i> <span>Staff Members</span></a>
         <a href="#logs" class="nav-item"><i class="ph ph-scroll"></i> <span>Logs</span></a>
+        <a href="#import-csv" class="nav-item"><i class="ph ph-file-csv"></i> <span>Bulk Import</span></a>
         <a href="#system-settings" class="nav-item"><i class="ph ph-swatches"></i> <span>Settings</span></a>
         <a href="#ultimate" class="nav-item" style="color: var(--accent);"><i class="ph ph-crown"></i> <span>Equity Hub</span></a>
     `;
