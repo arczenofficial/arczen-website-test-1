@@ -1,0 +1,301 @@
+---
+import type { Product } from '../lib/firestore';
+
+interface Props {
+    product: Product;
+}
+
+const { product } = Astro.props;
+
+// Lowest price across variants (or flat price)
+const basePrice = product.variants?.length
+    ? Math.min(...product.variants.map(v => v.sale_price ?? v.price))
+    : (product.on_sale && product.sale_price ? product.sale_price : product.price ?? 0);
+
+const originalBasePrice = product.variants?.length
+    ? Math.min(...product.variants.map(v => v.price))
+    : product.price ?? 0;
+
+const isOnSale = product.on_sale && basePrice < originalBasePrice;
+const savePercent = isOnSale && originalBasePrice > 0
+    ? Math.round(((originalBasePrice - basePrice) / originalBasePrice) * 100)
+    : 0;
+
+const categoryIcon: Record<string, string> = {
+    'subscription': '📦',
+    'game-topup':   '🎮',
+    'software':     '💻',
+    'service':      '⚙️',
+    'other':        '✨',
+};
+const icon = categoryIcon[product.category ?? 'other'] ?? '✨';
+---
+
+<div
+    class="product-card group relative"
+    data-card
+    data-product-id={product.id}
+>
+    <!-- Shine overlay -->
+    <div class="card-shine"></div>
+
+    <!-- Image -->
+    <div class="card-image-wrap">
+        <img
+            src={product.image || '/images/placeholder.png'}
+            alt={product.title}
+            class="card-img"
+            loading="lazy"
+            onerror="this.src='/images/placeholder.png'"
+        />
+        <div class="card-scrim"></div>
+
+        <!-- Sale badge -->
+        {isOnSale && <div class="card-sale-badge">SAVE {savePercent}%</div>}
+
+        <!-- Offer label (flash sale, eid special etc) -->
+        {product.offer_label && !isOnSale && (
+            <div class="card-offer-badge">{product.offer_label}</div>
+        )}
+
+        <!-- Category chip -->
+        <div class="card-category-chip">
+            {icon} {product.category?.replace('-', ' ')}
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+        <!-- Custom badge (🔥 Hot Deal, 🤖 AI Tool) -->
+        {product.badge && <span class="card-custom-badge">{product.badge}</span>}
+
+        <h3 class="card-title">{product.title}</h3>
+
+        {product.short_description && (
+            <p class="card-desc">{product.short_description}</p>
+        )}
+
+        <!-- Delivery type -->
+        <div class="card-delivery">
+            <span class={product.delivery_type === 'instant' ? 'instant' : 'manual'}>
+                {product.delivery_type === 'instant' ? '⚡ Instant Delivery' : '🕐 Fast Delivery'}
+            </span>
+        </div>
+
+        <!-- Price row -->
+        <div class="card-price-row">
+            {isOnSale ? (
+                <>
+                    <span class="card-price-original">৳{originalBasePrice}</span>
+                    <span class="card-price card-price-sale">৳{basePrice}</span>
+                </>
+            ) : (
+                <>
+                    <span class="card-price-from">{product.variants?.length ? 'From' : ''}</span>
+                    <span class="card-price">৳{basePrice}</span>
+                </>
+            )}
+        </div>
+
+        <!-- CTA -->
+        <button
+            class="card-btn"
+            data-product={JSON.stringify(product)}
+            onclick="window.dispatchEvent(new CustomEvent('arczen:open-modal', { detail: this.dataset.product }))"
+            aria-label={`View ${product.title} details`}
+        >
+            <span class="card-btn-text">View Details</span>
+            <span class="card-btn-arrow">→</span>
+        </button>
+    </div>
+
+    <!-- SEO Schema -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.title,
+        "image": `https://arczen.store${product.image}`,
+        "description": product.short_description || product.title,
+        "brand": { "@type": "Brand", "name": "ArcZen" },
+        "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "BDT",
+            "lowPrice": basePrice,
+            "highPrice": originalBasePrice,
+            "availability": product.in_stock
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock"
+        }
+    })} />
+</div>
+
+<style>
+    /* ─── Card ────────────────────────────────────────── */
+    .product-card {
+        position: relative;
+        border-radius: 16px;
+        cursor: pointer;
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.23,1,0.32,1),
+                    box-shadow 0.5s ease, border-color 0.3s ease;
+        background: #1a1714;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+        border: 1px solid rgba(198,167,94,0.06);
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .product-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(198,167,94,0.12), 0 8px 24px rgba(0,0,0,0.4);
+            border-color: rgba(198,167,94,0.15);
+        }
+        .product-card:hover .card-shine { opacity: 1; }
+        .product-card:hover .card-img { transform: scale(1.06); }
+        .product-card:hover .card-scrim { opacity: 1; }
+        .card-btn:hover {
+            background-position: right center;
+            box-shadow: 0 6px 20px rgba(198,167,94,0.5);
+            transform: translateY(-1px);
+            color: #0a0800;
+        }
+        .card-btn:hover .card-btn-arrow { transform: translateX(4px); }
+    }
+
+    /* ─── Shine ───────────────────────────────────────── */
+    .card-shine {
+        position: absolute; inset: 0; border-radius: 16px;
+        background: linear-gradient(135deg, rgba(198,167,94,0.08) 0%, rgba(198,167,94,0) 55%);
+        opacity: 0; transition: opacity 0.4s ease; pointer-events: none; z-index: 2;
+    }
+
+    /* ─── Image ───────────────────────────────────────── */
+    .card-image-wrap {
+        position: relative; aspect-ratio: 1/1; overflow: hidden;
+        border-radius: 16px 16px 0 0;
+    }
+    .card-img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.7s cubic-bezier(0.23,1,0.32,1); display: block;
+    }
+    .card-scrim {
+        position: absolute; inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(13,11,8,0.6) 100%);
+        opacity: 0; transition: opacity 0.4s ease;
+    }
+
+    /* ─── Badges ──────────────────────────────────────── */
+    .card-sale-badge {
+        position: absolute; top: 12px; left: 12px; z-index: 4;
+        padding: 5px 12px;
+        background: linear-gradient(135deg, #c04040, #d35050);
+        color: #fff; font-size: 0.65rem; font-weight: 700;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        border-radius: 6px; box-shadow: 0 3px 10px rgba(192,64,64,0.4);
+    }
+    .card-offer-badge {
+        position: absolute; top: 12px; left: 12px; z-index: 4;
+        padding: 5px 12px;
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        color: #fff; font-size: 0.65rem; font-weight: 700;
+        letter-spacing: 0.05em; border-radius: 6px;
+    }
+    .card-category-chip {
+        position: absolute; bottom: 10px; right: 10px; z-index: 4;
+        padding: 4px 10px;
+        background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+        color: rgba(255,255,255,0.85); font-size: 0.65rem; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: capitalize;
+        border-radius: 99px; border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ─── Body ────────────────────────────────────────── */
+    .card-body {
+        padding: 18px 20px 22px;
+        display: flex; flex-direction: column; gap: 8px; flex: 1;
+    }
+
+    .card-custom-badge {
+        display: inline-block; width: fit-content;
+        padding: 3px 10px; border-radius: 99px;
+        background: rgba(198,167,94,0.12); color: #c6a75e;
+        font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+    }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem; font-weight: 600;
+        line-height: 1.3; margin: 0; color: #f5f2eb;
+    }
+
+    .card-desc {
+        font-size: 0.8rem; color: #9a9387;
+        line-height: 1.5; margin: 0;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    /* ─── Delivery ────────────────────────────────────── */
+    .card-delivery { display: flex; align-items: center; }
+    .card-delivery .instant {
+        font-size: 0.72rem; font-weight: 600; color: #10b981;
+        background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 99px;
+    }
+    .card-delivery .manual {
+        font-size: 0.72rem; font-weight: 600; color: #f59e0b;
+        background: rgba(245,158,11,0.1); padding: 2px 8px; border-radius: 99px;
+    }
+
+    /* ─── Price ───────────────────────────────────────── */
+    .card-price-row {
+        display: flex; align-items: baseline; gap: 6px;
+        font-size: 1.05rem; font-weight: 600; color: #c6a75e;
+        margin-top: auto;
+    }
+    .card-price-from { font-size: 0.72rem; font-weight: 400; color: #9a9387; }
+    .card-price-original {
+        font-size: 0.82rem; font-weight: 400; color: #7a756d;
+        text-decoration: line-through; text-decoration-color: rgba(200,80,80,0.6);
+    }
+    .card-price-sale { color: #e8c87a; font-weight: 700; }
+
+    /* ─── CTA Button ──────────────────────────────────── */
+    .card-btn {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 11px 18px; border-radius: 10px; border: none; cursor: pointer;
+        font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+        text-transform: uppercase; margin-top: 6px;
+        background: linear-gradient(135deg, #c6a75e 0%, #e8c87a 50%, #c6a75e 100%);
+        background-size: 200% 200%; background-position: left center;
+        color: #1a1200;
+        box-shadow: 0 3px 12px rgba(198,167,94,0.25);
+        transition: all 0.3s ease;
+    }
+    .card-btn-arrow { transition: transform 0.3s ease; }
+</style>
+
+<script>
+    // 3D tilt — mouse only
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.querySelectorAll<HTMLElement>('[data-card]').forEach(card => {
+            card.addEventListener('mousemove', (e: MouseEvent) => {
+                const rect = card.getBoundingClientRect();
+                const dx = (e.clientX - (rect.left + rect.width / 2))  / (rect.width  / 2);
+                const dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2);
+                card.style.transform = `translateY(-8px) scale(1.02) rotateX(${-dy * 5}deg) rotateY(${dx * 5}deg)`;
+            });
+            card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+        });
+    }
+
+    // Open product modal
+    document.querySelectorAll('[data-open-product]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            try {
+                const product = JSON.parse((btn as HTMLElement).dataset.openProduct!);
+                document.dispatchEvent(new CustomEvent('arczen:open-product', { detail: product }));
+            } catch {}
+        });
+    });
+</script>

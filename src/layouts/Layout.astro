@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+const {
+    title = "Arczen — Digital Studio & Store | Web Design, Gaming, Subscriptions | Bangladesh",
+    description = "Arczen is Bangladesh's new digital brand. Professional creative services & instant digital goods delivery."
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://arczen.store';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <meta name="description" content={description}>
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href={siteUrl}>
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content={siteUrl}>
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
+    
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Stripe -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- Firebase Variables -->
+    <meta name="fb-api-key" content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+    <meta name="fb-auth-domain" content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+    <meta name="fb-project-id" content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+        "@context":"https://schema.org",
+        "@type":"Organization",
+        "name":"Arczen",
+        "url": siteUrl,
+        "description":"Bangladesh's digital studio and store — creative services and digital goods.",
+        "address":{
+            "@type":"PostalAddress",
+            "addressCountry":"BD",
+            "addressLocality":"Dhaka"
+        }
+    })} />
+</head>
+<body>
+    <slot />
+
+    <!-- Anonymous visitor/session tracker removed as it was missing -->
+
+    <script>
+        // Scroll reveal logic from index.html extended for Astro routing
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            const revealOnScroll = () => {
+                const windowHeight = window.innerHeight;
+                const elementVisible = 100;
+                reveals.forEach(reveal => {
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveal.classList.add('in');
+                    }
+                });
+            };
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll(); // trigger on load
+        });
+    </script>
+</body>
+</html>

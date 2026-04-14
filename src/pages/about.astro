@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="About Us | ArcZen">
+  <Header />
+
+  <div class="page active" id="page-about">
+    <div class="container" style="padding-top:110px;padding-bottom:80px;">
+      <div class="about-layout">
+        <div>
+          <div class="founder-card">
+            <div class="founder-av">AZ</div>
+            <div class="founder-name">Founder, Arczen</div>
+            <div class="founder-role">RUET Graduate · Digital Entrepreneur</div>
+            <div class="founder-creds">
+              <div class="founder-cred">🎓 Rajshahi University of Engineering</div>
+              <div class="founder-cred">📍 Based in Dhaka, Bangladesh</div>
+              <div class="founder-cred">🌍 Serving clients globally</div>
+              <div class="founder-cred">🚀 Brand launched in 2025</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-story">
+          <div class="sec-tag" style="margin-bottom:14px">About Arczen</div>
+          <h1 style="font-size:clamp(2rem,4vw,3rem);font-family:var(--font-d);font-weight:900;margin-bottom:20px">Built Different.<br>On Purpose.</h1>
+          <p>Arczen is a new multi-vertical digital brand based in Dhaka, Bangladesh. We serve businesses who need professional creative output — websites, brand identities, video content — and individuals who need trusted access to digital products.</p>
+          <p>Founded by a RUET engineer with a conviction that Bangladeshi businesses deserve agency-quality output at fair prices — without inflated retainers, vague deliverables, or communication black holes.</p>
+          <p>We're not pretending to be bigger than we are. We're a focused, new studio with high standards and a clear process. Our track record is small but real — and growing.</p>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+              <div><div class="tl-year">2025</div><div class="tl-content"><h4>Arczen Founded</h4><p>First creative projects. First clients. Building the foundation.</p></div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+              <div><div class="tl-year">2025</div><div class="tl-content"><h4>Arczen Store Launched</h4><p>Gaming items and digital subscriptions. Instant delivery system live.</p></div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot" style="background:var(--gold);outline-color:var(--bg)"></div></div>
+              <div><div class="tl-year" style="color:var(--gold)">2026 →</div><div class="tl-content"><h4>Arczen Engine (Phase 2)</h4><p>AI automation. Currently in development.</p></div></div>
+            </div>
+          </div>
+          <div style="background:var(--teal-dim);border:1px solid rgba(14,165,233,0.2);border-radius:var(--radius);padding:24px;margin-top:8px;">
+            <h3 style="font-size:0.95rem;font-family:var(--font-d);margin-bottom:10px;">Our Mission</h3>
+            <p style="font-size:0.88rem;color:var(--text-2);line-height:1.75;margin:0">"Bangladeshi businesses deserve access to global-quality digital output at fair prices — without gatekeeping or opacity. Arczen is that access point."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <CartDrawer />
+  <Footer />
+</Layout>

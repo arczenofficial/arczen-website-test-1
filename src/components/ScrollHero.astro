@@ -1,0 +1,542 @@
+---
+// ScrollHero.astro — Cinematic scroll-driven image sequence hero
+// Reduced scroll heights: 200vh desktop / 150vh mobile
+// Two-phase frame mapping: frames 0-102 in phase 1, 103-191 in phase 2
+// Autoplay: auto-advances to frame 60 on load before any scroll
+const TOTAL_FRAMES = 192;
+const frameFiles = Array.from({ length: TOTAL_FRAMES }, (_, i) => 
+    `/images/hero-seq/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`
+);
+---
+
+<!-- Scroll container: 200vh desktop / 150vh mobile -->
+<section id="home" class="scroll-hero-container">
+    
+    <!-- Sticky viewport -->
+    <div class="scroll-hero-sticky">
+        
+        <!-- Canvas for frame rendering -->
+        <canvas id="hero-canvas" class="scroll-hero-canvas"></canvas>
+        
+        <!-- Loading overlay -->
+        <div id="hero-loader" class="hero-loader">
+            <div class="hero-loader-inner">
+                <div class="hero-loader-ring"></div>
+                <p class="hero-loader-text" id="hero-loader-percent">0%</p>
+            </div>
+        </div>
+
+        <!-- Text overlays — layered above canvas -->
+        
+        <!-- BEAT 1: Hero State (0–20%) — centered with dark backdrop -->
+        <div class="scroll-overlay scroll-overlay-1" data-scroll-show="0" data-scroll-hide="0.18" data-anim="fade">
+            <div class="scroll-content scroll-content-center">
+                <div class="scroll-text-backdrop">
+                    <p class="scroll-tag">— Crafted to Feel —</p>
+                    <h1 class="scroll-headline-lg">Scenter</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- BEAT 2: Controlled Reveal (20–50%) — FAR LEFT, slide in -->
+        <div class="scroll-overlay scroll-overlay-2" data-scroll-show="0.22" data-scroll-hide="0.48" data-anim="slide-left">
+            <div class="scroll-content scroll-content-far-left">
+                <h2 class="scroll-headline-md">Precision in<br/>every detail.</h2>
+            </div>
+        </div>
+
+        <!-- BEAT 3: Essence Reveal (50–80%) — FAR RIGHT, slide in -->
+        <div class="scroll-overlay scroll-overlay-3" data-scroll-show="0.52" data-scroll-hide="0.78" data-anim="slide-right">
+            <div class="scroll-content scroll-content-far-right">
+                <h2 class="scroll-headline-md">Depth.<br/>Character.<br/>Presence.</h2>
+            </div>
+        </div>
+
+        <!-- Canvas blur overlay for final beat -->
+        <div id="hero-blur-overlay" class="scroll-blur-overlay"></div>
+
+        <!-- BEAT 4: Final Lock — appears AFTER sequence, persists -->
+        <div class="scroll-overlay scroll-overlay-4" id="scroll-final" data-scroll-show="0.93" data-scroll-hide="999" data-anim="fade">
+            <div class="scroll-content scroll-content-center">
+                <h2 class="scroll-headline-lg">Own the moment.</h2>
+                <p class="scroll-sub">Crafted to Feel.</p>
+                <div class="scroll-cta-group">
+                    <a href="#collection" class="scroll-cta-primary">Explore the Collection</a>
+                    <a href="#collection" class="scroll-cta-secondary">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll progress indicator -->
+        <div class="scroll-progress-track">
+            <div id="scroll-progress-bar" class="scroll-progress-bar"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Preload frame data -->
+<script define:vars={{ frameFiles, TOTAL_FRAMES }}>
+    window.__heroFrames = frameFiles;
+    window.__heroTotalFrames = TOTAL_FRAMES;
+</script>
+
+<style>
+    /* ─── Scroll container — REDUCED HEIGHTS ─── */
+    .scroll-hero-container {
+        position: relative;
+        height: 200vh;          /* was 400vh — completes in one scroll */
+        background: #0a0804;
+    }
+
+    /* Mobile: even shorter for smoother experience */
+    @media (max-width: 768px) {
+        .scroll-hero-container {
+            height: 150vh;      /* ~half screen of scrolling on mobile */
+        }
+    }
+
+    /* ─── Sticky viewport ─── */
+    .scroll-hero-sticky {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a0804;
+    }
+
+    /* ─── Canvas ─── */
+    .scroll-hero-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
+
+    /* ─── Loading overlay ─── */
+    .hero-loader {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a0804;
+        transition: opacity 0.6s ease;
+    }
+
+    .hero-loader.loaded {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .hero-loader-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .hero-loader-ring {
+        width: 48px;
+        height: 48px;
+        border: 2px solid rgba(198,167,94,0.15);
+        border-top-color: #c6a75e;
+        border-radius: 50%;
+        animation: hero-spin 0.9s linear infinite;
+    }
+
+    @keyframes hero-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .hero-loader-text {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        color: rgba(198,167,94,0.7);
+        margin: 0;
+    }
+
+    /* ─── Overlay layers ─── */
+    .scroll-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        will-change: opacity, transform;
+    }
+
+    /* Slide states */
+    .scroll-overlay[data-state="hidden-left"]  { opacity: 0; transform: translateX(-80px); }
+    .scroll-overlay[data-state="hidden-right"] { opacity: 0; transform: translateX(80px); }
+    .scroll-overlay[data-state="visible"]       { opacity: 1; transform: translateX(0); }
+    .scroll-overlay[data-state="exit-left"]     { opacity: 0; transform: translateX(-120px); }
+    .scroll-overlay[data-state="exit-right"]    { opacity: 0; transform: translateX(120px); }
+    .scroll-overlay[data-state="hidden"]        { opacity: 0; transform: none; }
+    .scroll-overlay[data-state="visible-fade"]  { opacity: 1; transform: none; }
+
+    .scroll-content {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 48px;
+    }
+
+    .scroll-content-center { text-align: center; }
+
+    /* FAR LEFT — hugs left edge */
+    .scroll-content-far-left {
+        text-align: left;
+        max-width: 400px;
+        margin: 0;
+        margin-left: 5vw;
+    }
+
+    /* FAR RIGHT — hugs right edge */
+    .scroll-content-far-right {
+        text-align: right;
+        max-width: 400px;
+        margin: 0;
+        margin-left: auto;
+        margin-right: 5vw;
+    }
+
+    /* Dark backdrop behind opening text */
+    .scroll-text-backdrop {
+        background: radial-gradient(ellipse at center, rgba(5,4,2,0.85) 0%, rgba(10,8,4,0.5) 50%, transparent 75%);
+        padding: 50px 80px;
+        border-radius: 24px;
+    }
+
+    /* Blur overlay for final beat */
+    .scroll-blur-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        background: transparent;
+        transition: backdrop-filter 0.6s ease, background 0.6s ease;
+        pointer-events: none;
+    }
+
+    .scroll-blur-overlay.active {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        background: rgba(10,8,4,0.45);
+    }
+
+    /* Beat 4 sits above blur */
+    .scroll-overlay-4 { z-index: 3; }
+
+    /* ─── Typography ─── */
+    .scroll-tag {
+        font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-style: italic;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(198, 167, 94, 1);
+        margin-bottom: 16px;
+        text-shadow: 0 0 20px rgba(10,8,4,0.8), 0 0 40px rgba(10,8,4,0.6);
+    }
+
+    .scroll-headline-lg {
+        font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+        font-size: clamp(3.5rem, 9vw, 8rem);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        line-height: 1.0;
+        color: #f5f2eb;
+        margin: 0 0 20px;
+        text-shadow: 0 4px 50px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .scroll-headline-md {
+        font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+        font-size: clamp(2.2rem, 5vw, 4.5rem);
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        line-height: 1.1;
+        color: #f5f2eb;
+        margin: 0;
+        text-shadow: 0 3px 40px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .scroll-sub {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(1rem, 1.5vw, 1.3rem);
+        font-weight: 400;
+        font-style: italic;
+        letter-spacing: 0.1em;
+        color: rgba(245, 242, 235, 0.75);
+        margin-bottom: 12px;
+    }
+
+    /* ─── CTAs ─── */
+    .scroll-cta-group {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 32px;
+        pointer-events: auto;
+    }
+
+    .scroll-cta-primary {
+        display: inline-block;
+        padding: 14px 36px;
+        background: linear-gradient(135deg, #c6a75e, #e8c87a);
+        color: #0a0804;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 0;
+        transition: box-shadow 0.4s ease, transform 0.3s ease;
+    }
+
+    .scroll-cta-primary:hover {
+        box-shadow: 0 8px 30px rgba(198,167,94,0.4);
+        transform: translateY(-2px);
+    }
+
+    .scroll-cta-secondary {
+        display: inline-flex;
+        align-items: center;
+        padding: 14px 36px;
+        border: 1px solid rgba(198,167,94,0.4);
+        color: #f5f2eb;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .scroll-cta-secondary:hover {
+        border-color: rgba(198,167,94,0.8);
+        background: rgba(198,167,94,0.08);
+    }
+
+    /* ─── Progress indicator ─── */
+    .scroll-progress-track {
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 120px;
+        background: rgba(245,242,235,0.1);
+        border-radius: 1px;
+        z-index: 3;
+    }
+
+    .scroll-progress-bar {
+        width: 100%;
+        height: 0%;
+        background: linear-gradient(180deg, #c6a75e, #e8c87a);
+        border-radius: 1px;
+        transition: height 0.1s linear;
+    }
+
+    /* ─── Mobile adjustments ─── */
+    @media (max-width: 768px) {
+        .scroll-content { padding: 0 24px; }
+        .scroll-content-left,
+        .scroll-content-right { text-align: center; }
+        .scroll-cta-group {
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .scroll-progress-track { display: none; }
+        .scroll-text-backdrop { padding: 30px 32px; }
+    }
+</style>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const frameFiles: string[] = (window as any).__heroFrames;
+        const totalFrames: number = (window as any).__heroTotalFrames;
+
+        // ─── Two-phase split ───
+        // Phase 1: frames 0–102 (indices 0 to 102)
+        // Phase 2: frames 103–191 (indices 103 to 191)
+        const PHASE_SPLIT = 103; // frame index where phase 2 starts
+
+        const images: HTMLImageElement[] = new Array(totalFrames);
+        let loadedCount = 0;
+        let currentFrame = 0;
+        let targetFrame = 0;
+        let animId: number;
+
+        // ─── Scroll-only state ───
+        let hasUserScrolled = false;
+
+        // ─── Resize canvas to fill viewport ───
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawFrame(Math.round(currentFrame));
+        }
+
+        // ─── Draw a frame to canvas (cover mode) ───
+        function drawFrame(index: number) {
+            const img = images[index];
+            if (!img || !img.complete || !ctx) return;
+
+            const cW = canvas.width;
+            const cH = canvas.height;
+            const iW = img.naturalWidth;
+            const iH = img.naturalHeight;
+
+            const scale = Math.max(cW / iW, cH / iH);
+            const w = iW * scale;
+            const h = iH * scale;
+            const x = (cW - w) / 2;
+            const y = (cH - h) / 2;
+
+            ctx.clearRect(0, 0, cW, cH);
+            ctx.drawImage(img, x, y, w, h);
+        }
+
+        // ─── Preload all frames with progress ───
+        const loader = document.getElementById('hero-loader');
+        const loaderPercent = document.getElementById('hero-loader-percent');
+        const MIN_LOADED = 30;
+
+        function preloadFrames() {
+            frameFiles.forEach((src, i) => {
+                const img = new Image();
+                img.src = src;
+                img.onload = () => {
+                    loadedCount++;
+                    const pct = Math.round((loadedCount / totalFrames) * 100);
+                    if (loaderPercent) loaderPercent.textContent = pct + '%';
+
+                    if (i === 0) {
+                        resizeCanvas();
+                        drawFrame(0);
+                    }
+                    // Hide loader once enough frames loaded, then start autoplay
+                    if (loadedCount >= MIN_LOADED && loader) {
+                        loader.classList.add('loaded');
+                    }
+                };
+                images[i] = img;
+            });
+        }
+
+        // ─── Scroll → Frame mapping (two-phase) ───
+        function getScrollProgress(): number {
+            const container = document.querySelector('.scroll-hero-container') as HTMLElement;
+            if (!container) return 0;
+            const rect = container.getBoundingClientRect();
+            const scrollRange = container.offsetHeight - window.innerHeight;
+            const progress = Math.max(0, Math.min(1, -rect.top / scrollRange));
+            return progress;
+        }
+
+        function progressToFrame(progress: number): number {
+            // Phase 1: progress 0–0.5 → frames 0–(PHASE_SPLIT-1)
+            // Phase 2: progress 0.5–1.0 → frames PHASE_SPLIT–(totalFrames-1)
+            if (progress <= 0.5) {
+                const p1 = progress / 0.5; // 0 to 1 within phase 1
+                return p1 * (PHASE_SPLIT - 1);
+            } else {
+                const p2 = (progress - 0.5) / 0.5; // 0 to 1 within phase 2
+                return PHASE_SPLIT + p2 * (totalFrames - 1 - PHASE_SPLIT);
+            }
+        }
+
+        // ─── Main animation loop ───
+        function animate(timestamp: number) {
+            // Smooth interpolation toward target — easing factor 0.25 (snappier than 0.15)
+            const diff = targetFrame - currentFrame;
+            currentFrame += diff * 0.25;
+
+            const frameIndex = Math.round(currentFrame);
+            const clampedIndex = Math.max(0, Math.min(totalFrames - 1, frameIndex));
+
+            drawFrame(clampedIndex);
+            updateOverlays(getScrollProgress());
+
+            animId = requestAnimationFrame(animate);
+        }
+
+        // ─── Text overlay visibility with slide animations ───
+        function updateOverlays(progress: number) {
+            const overlays = document.querySelectorAll<HTMLElement>('.scroll-overlay');
+            overlays.forEach(overlay => {
+                const show = parseFloat(overlay.dataset.scrollShow || '0');
+                const hide = parseFloat(overlay.dataset.scrollHide || '1');
+                const anim = overlay.dataset.anim || 'fade';
+                const isPersistent = hide > 100;
+
+                let state = 'hidden';
+
+                if (isPersistent) {
+                    state = progress >= show ? 'visible-fade' : 'hidden';
+                } else if (progress < show) {
+                    if (anim === 'slide-left') state = 'hidden-left';
+                    else if (anim === 'slide-right') state = 'hidden-right';
+                    else state = 'hidden';
+                } else if (progress >= show && progress <= hide) {
+                    if (anim === 'fade') state = 'visible-fade';
+                    else state = 'visible';
+                } else {
+                    if (anim === 'slide-left') state = 'exit-left';
+                    else if (anim === 'slide-right') state = 'exit-right';
+                    else state = 'hidden';
+                }
+
+                overlay.dataset.state = state;
+            });
+
+            // Blur overlay for final beat
+            const blurOverlay = document.getElementById('hero-blur-overlay');
+            if (blurOverlay) {
+                blurOverlay.classList.toggle('active', progress >= 0.90);
+            }
+
+            // Progress bar
+            const bar = document.getElementById('scroll-progress-bar');
+            if (bar) bar.style.height = `${Math.min(progress * 100, 100)}%`;
+        }
+
+        // ─── Scroll handler ───
+        function onScroll() {
+            hasUserScrolled = true;
+            const progress = getScrollProgress();
+            targetFrame = progressToFrame(progress);
+        }
+
+        // ─── Init ───
+        preloadFrames();
+        resizeCanvas();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', resizeCanvas);
+        requestAnimationFrame(animate);
+    })();
+</script>

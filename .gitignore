@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.astro/
+coverage/
+DATA/
+public/images/hero-seq/old/
+# Local Netlify folder
+.netlify
+service-account.json
+*.log
+test-pk.cjs
+build_error.txt
+build-log.txt
+site tech doc.txt
+prodicts details.txt

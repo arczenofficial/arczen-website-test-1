@@ -1,0 +1,486 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="ArcZen — Premium Digital Brand | Dhaka, Bangladesh">
+  <Header />
+  
+  <main id="page-home">
+    <!-- 1. DYNAMIC HERO -->
+    <section class="hero-v2">
+      <div class="container hero-grid">
+        <div class="hero-info">
+          <div class="sale-chip">
+            <span class="pulse"></span>
+            Flash Sale Ends In: <span id="hero-timer">00:00:00</span>
+          </div>
+          <h1 class="hero-h">
+            Instant Digital Access.<br>
+            <span class="grad-text">Creative Excellence.</span>
+          </h1>
+          <p class="hero-p">
+            Get ChatGPT Plus, Valorant VP, and Netflix 4K in minutes. Or scale your brand with our elite studio services. All in one trusted platform.
+          </p>
+          <div class="hero-btns">
+            <a href="/store" class="btn-mega">Shop the Store →</a>
+            <a href="/services" class="btn-soft">View Services</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat"><span class="stat-n">10k+</span> Orders</div>
+            <div class="stat"><span class="stat-n">4.9/5</span> Rating</div>
+            <div class="stat"><span class="stat-n">24/7</span> Support</div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="promo-card animate-float">
+            <div class="promo-img">🎮</div>
+            <div class="promo-content">
+              <div class="promo-tag">Best Seller</div>
+              <div class="promo-h">Valorant VP</div>
+              <div class="promo-p">Instant Top-up</div>
+            </div>
+          </div>
+          <div class="promo-card animate-float-delay">
+            <div class="promo-img">🤖</div>
+            <div class="promo-content">
+              <div class="promo-tag">Popular</div>
+              <div class="promo-h">ChatGPT Plus</div>
+              <div class="promo-p">Shared & Private</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CATEGORIES GRID -->
+    <section class="section-pb">
+      <div class="container">
+        <div class="cat-grid-v2">
+          <a href="/store?cat=gaming" class="cat-box">
+            <div class="cat-icon">🕹️</div>
+            <span>Gaming</span>
+          </a>
+          <a href="/store?cat=subscriptions" class="cat-box">
+            <div class="cat-icon">📺</div>
+            <span>Premium Ads</span>
+          </a>
+          <a href="/store?cat=creative" class="cat-box">
+            <div class="cat-icon">🎨</div>
+            <span>Creative</span>
+          </a>
+          <a href="/store?cat=software" class="cat-box">
+            <div class="cat-icon">💻</div>
+            <span>Software</span>
+          </a>
+          <a href="/store?cat=giftcards" class="cat-box">
+            <div class="cat-icon">🎁</div>
+            <span>Gift Cards</span>
+          </a>
+          <a href="/store" class="cat-box">
+            <div class="cat-icon">📦</div>
+            <span>All</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FLASH SALE SECTION -->
+    <section class="section flash-sale-sec">
+      <div class="container">
+        <div class="sec-head-v2">
+          <div class="sec-info">
+            <h2 class="h-sec">🔥 Flash Sale</h2>
+            <p>Limited time offers with instant activation</p>
+          </div>
+          <div class="timer-box-v2">
+            Ends In: <span id="sale-timer-main" class="timer-grad">00:00:00</span>
+          </div>
+        </div>
+
+        <div class="flash-items-grid">
+           <!-- Card 1 -->
+           <div class="product-card-v2 flash-card">
+              <div class="card-tag">-20%</div>
+              <div class="card-img-box">
+                <div class="card-emoji">🎮</div>
+              </div>
+              <div class="card-body">
+                <div class="card-cat">Gaming</div>
+                <h3>Valorant 1100 VP</h3>
+                <div class="price-row">
+                  <span class="price">৳840</span>
+                  <span class="old-price">৳1,050</span>
+                </div>
+                <div class="stock-progress">
+                  <div class="stock-bar"><div class="stock-bar-inner" style="width: 65%;"></div></div>
+                  <span class="stock-text">65% Claimed</span>
+                </div>
+                <button class="btn-add-quick" onclick="handleQuickAdd('val-1100', 'Valorant 1100 VP', 840, '🎮')">Add to Cart</button>
+              </div>
+           </div>
+           <!-- Card 2 -->
+           <div class="product-card-v2 flash-card">
+              <div class="card-tag">-15%</div>
+              <div class="card-img-box">
+                <div class="card-emoji">🤖</div>
+              </div>
+              <div class="card-body">
+                <div class="card-cat">AI Tools</div>
+                <h3>ChatGPT Plus (1 Month)</h3>
+                <div class="price-row">
+                  <span class="price">৳2,450</span>
+                  <span class="old-price">৳2,800</span>
+                </div>
+                <div class="stock-progress">
+                  <div class="stock-bar"><div class="stock-bar-inner" style="width: 40%;"></div></div>
+                  <span class="stock-text">40% Claimed</span>
+                </div>
+                <button class="btn-add-quick" onclick="handleQuickAdd('chatgpt-plus', 'ChatGPT Plus (1 Month)', 2450, '🤖')">Add to Cart</button>
+              </div>
+           </div>
+           <!-- Card 3 -->
+           <div class="product-card-v2 flash-card">
+              <div class="card-tag">-30%</div>
+              <div class="card-img-box">
+                <div class="card-emoji">📺</div>
+              </div>
+              <div class="card-body">
+                <div class="card-cat">Entertainment</div>
+                <h3>Netflix 4K (Private)</h3>
+                <div class="price-row">
+                  <span class="price">৳380</span>
+                  <span class="old-price">৳550</span>
+                </div>
+                <div class="stock-progress">
+                  <div class="stock-bar"><div class="stock-bar-inner" style="width: 85%;"></div></div>
+                  <span class="stock-text">85% Claimed</span>
+                </div>
+                <button class="btn-add-quick" onclick="handleQuickAdd('netflix-subscription', 'Netflix 4K (Private)', 380, '📺')">Add to Cart</button>
+              </div>
+           </div>
+           <!-- Card 4 -->
+           <div class="product-card-v2 flash-card">
+              <div class="card-tag">-10%</div>
+              <div class="card-img-box">
+                <div class="card-emoji">💎</div>
+              </div>
+              <div class="card-body">
+                <div class="card-cat">Gaming</div>
+                <h3>1000 FF Diamonds</h3>
+                <div class="price-row">
+                  <span class="price">৳720</span>
+                  <span class="old-price">৳800</span>
+                </div>
+                <div class="stock-progress">
+                  <div class="stock-bar"><div class="stock-bar-inner" style="width: 12%;"></div></div>
+                  <span class="stock-text">12% Claimed</span>
+                </div>
+                <button class="btn-add-quick" onclick="handleQuickAdd('free-fire-diamonds', '1000 FF Diamonds', 720, '💎')">Add to Cart</button>
+              </div>
+           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. RECOMMENDED FOR YOU Placeholder -->
+    <section class="section section-rec">
+      <div class="container">
+        <div class="sec-head-v2">
+          <h2 class="h-sec">🎯 Recommended for You</h2>
+          <a href="/store" class="link-more">View All Products →</a>
+        </div>
+        <div class="grid d-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
+           <!-- Add some recommended items for now -->
+            <div class="product-card-v2">
+              <div class="card-img" style="background:#1a1c23">CP</div>
+              <div class="card-body">
+                <h3>Canva Pro (Annual)</h3>
+                <div class="price-row">
+                  <span class="price">৳450</span>
+                </div>
+                <button class="btn-add-quick">Add to Cart</button>
+              </div>
+           </div>
+           <div class="product-card-v2">
+              <div class="card-img" style="background:#1a1c23">SP</div>
+              <div class="card-body">
+                <h3>Spotify Premium (Individual)</h3>
+                <div class="price-row">
+                  <span class="price">৳150</span>
+                </div>
+                <button class="btn-add-quick">Add to Cart</button>
+              </div>
+           </div>
+           <div class="product-card-v2">
+              <div class="card-img" style="background:#1a1c23">YT</div>
+              <div class="card-body">
+                <h3>YouTube Premium (1 Month)</h3>
+                <div class="price-row">
+                  <span class="price">৳220</span>
+                </div>
+                <button class="btn-add-quick">Add to Cart</button>
+              </div>
+           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. TRUST BANNER -->
+    <section class="trust-banner">
+      <div class="container trust-flex">
+        <div class="trust-item">
+          <span class="trust-icon">⚡</span>
+          <div>
+            <strong>Instant Delivery</strong>
+            <p>Sent via WhatsApp/Email</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🛡️</span>
+          <div>
+            <strong>Verified Genuine</strong>
+            <p>100% safe & non-bannable</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">💬</span>
+          <div>
+            <strong>24/7 Support</strong>
+            <p>Our team is here to help</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <CartDrawer />
+  <Footer />
+</Layout>
+
+<style>
+  #page-home { background: #080a0c; color: #f5f2eb; padding-top: 100px; }
+
+  /* Hero Redesign */
+  .hero-v2 { padding: 60px 0 100px; }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  @media (max-width: 1024px) { 
+    #page-home { padding-top: 80px; }
+    .hero-grid { grid-template-columns: 1fr; text-align: center; } 
+    .hero-visual { display: none; }
+  }
+
+  .sale-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(198, 167, 94, 0.1);
+    border: 1px solid rgba(198, 167, 94, 0.2);
+    padding: 8px 16px;
+    border-radius: 100px;
+    color: #c6a75e;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  .pulse { width: 8px; height: 8px; background: #c6a75e; border-radius: 50%; animation: pulse-anim 1.5s infinite; }
+  @keyframes pulse-anim { 0% { box-shadow: 0 0 0 0 rgba(198, 167, 94, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(198, 167, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(198, 167, 94, 0); } }
+
+  .hero-h { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 24px; }
+  .hero-p { font-size: 1.2rem; color: #9a9387; line-height: 1.6; margin-bottom: 40px; max-width: 600px; }
+  @media (max-width: 1024px) { .hero-p { margin: 0 auto 40px; } }
+
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+  @media (max-width: 1024px) { .hero-btns { justify-content: center; } }
+  .btn-mega {
+    background: linear-gradient(135deg, #c6a75e, #e8c87a);
+    color: #1a1200;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  .btn-soft {
+    background: rgba(255,255,255,0.05);
+    color: #f5f2eb;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .btn-mega:hover { transform: translateY(-3px); }
+
+  .hero-stats { display: flex; gap: 30px; margin-top: 50px; color: #9a9387; font-size: 0.9rem; }
+  @media (max-width: 1024px) { .hero-stats { justify-content: center; } }
+  .stat-n { display: block; color: #f5f2eb; font-weight: 800; font-size: 1.2rem; }
+
+  /* Promo Cards */
+  .hero-visual { position: relative; height: 350px; }
+  .promo-card {
+    position: absolute;
+    background: #1a1c23;
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex; gap: 16px;
+    width: 280px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .promo-card:nth-child(1) { top: 10%; right: 0; }
+  .promo-card:nth-child(2) { bottom: 10%; left: 0; }
+  .promo-img { width: 60px; height: 60px; background: rgba(198,167,94,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+  .promo-tag { font-size: 0.7rem; color: #c6a75e; font-weight: 800; text-transform: uppercase; }
+  .promo-h { font-weight: 700; }
+  .promo-p { font-size: 0.8rem; color: #9a9387; }
+
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-float-delay { animation: float 6s ease-in-out 3s infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+  /* Categories */
+  .section-pb { padding-bottom: 60px; }
+  .cat-grid-v2 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .cat-grid-v2 { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 500px) { .cat-grid-v2 { grid-template-columns: repeat(2, 1fr); } }
+  .cat-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #f5f2eb;
+    transition: all 0.2s;
+  }
+  .cat-box:hover { background: rgba(198,167,94,0.1); border-color: rgba(198,167,94,0.3); transform: translateY(-5px); }
+  .cat-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+  .cat-box span { font-weight: 700; font-size: 0.9rem; }
+
+  /* Flash Sale */
+  .flash-sale-sec { background: rgba(198,167,94,0.02); border-top: 1px solid rgba(198,167,94,0.05); border-bottom: 1px solid rgba(198,167,94,0.05); padding: 80px 0; }
+  .sec-head-v2 { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
+  .h-sec { font-size: 2rem; font-weight: 900; }
+  .sec-info p { color: #9a9387; font-size: 1.1rem; }
+  .timer-box-v2 { font-weight: 700; color: #9a9387; font-size: 1rem; }
+  .timer-grad { color: #f5f2eb; background: #c6a75e; color: #1a1200; padding: 4px 12px; border-radius: 8px; margin-left:10px; font-family: monospace; }
+
+  .flash-items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+  /* Product Cards V2 Premium */
+  .product-card-v2 {
+    background: #1a1714;
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 24px;
+    padding: 20px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    overflow: hidden;
+  }
+  .product-card-v2:hover { 
+    transform: translateY(-8px); 
+    border-color: rgba(198, 167, 94, 0.2);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .card-tag { position: absolute; top: 16px; left: 16px; background: #ff4757; color: #fff; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; z-index: 2; box-shadow: 0 4px 12px rgba(255,71,87,0.3); }
+  
+  .card-img-box { 
+    height: 180px; border-radius: 16px; margin-bottom: 20px; 
+    display: flex; align-items: center; justify-content: center; 
+    background: #0f1115; border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.4s;
+  }
+  .product-card-v2:hover .card-img-box { transform: scale(1.02); }
+  .card-emoji { font-size: 3.5rem; filter: drop-shadow(0 0 10px rgba(198,167,94,0.1)); }
+
+  .card-cat { font-size: 0.75rem; color: #c6a75e; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .product-card-v2 h3 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 800; margin-bottom: 12px; color: #f5f2eb; }
+  
+  .price-row { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+  .price { font-size: 1.4rem; font-weight: 900; color: #c6a75e; }
+  .old-price { font-size: 0.95rem; color: #555; text-decoration: line-through; }
+
+  .stock-progress { margin-bottom: 24px; }
+  .stock-bar { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; position: relative; overflow: hidden; margin-bottom: 8px; }
+  .stock-bar-inner { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #c6a75e, #e8c87a); border-radius: 10px; }
+  .stock-text { font-size: 0.78rem; color: #9a9387; font-weight: 700; }
+
+  .btn-add-quick { 
+    width: 100%; background: rgba(198,167,94,0.1); color: #c6a75e; 
+    border: 1.5px solid rgba(198,167,94,0.25); padding: 14px; 
+    border-radius: 14px; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.3s; 
+  }
+  .btn-add-quick:hover { background: #c6a75e; color: #1a1200; box-shadow: 0 10px 20px rgba(198,167,94,0.2); }
+
+  .link-more { color: #c6a75e; text-decoration: none; font-weight: 800; font-size: 0.95rem; border-bottom: 1.5px solid transparent; transition: all 0.3s; }
+  .link-more:hover { border-color: #c6a75e; padding-bottom: 2px; }
+
+  /* Trust Banner */
+  .trust-banner { padding: 60px 0; background: #0a0c10; }
+  .trust-flex { display: flex; justify-content: space-between; gap: 40px; }
+  @media (max-width: 768px) { .trust-flex { flex-direction: column; gap: 30px; } }
+  .trust-item { display: flex; gap: 16px; align-items: center; }
+  .trust-icon { font-size: 2rem; background: rgba(255,255,255,0.03); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 100px; flex-shrink: 0; }
+  .trust-item strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .trust-item p { font-size: 0.85rem; color: #9a9387; }
+</style>
+
+<script>
+  // --- BD Flash Sale Timer Logic ---
+  function getTimeString() {
+    const now = new Date();
+    // BD is UTC+6
+    const bdOffset = 6 * 60 * 60 * 1000; 
+    const bdTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + bdOffset);
+    
+    // Cycle resets every 24h at midnight BD time
+    const bdMidnight = new Date(bdTime);
+    bdMidnight.setHours(24, 0, 0, 0);
+    
+    const diff = bdMidnight.getTime() - bdTime.getTime();
+    
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  setInterval(() => {
+    const timeStr = getTimeString();
+    const heroTimer = document.getElementById('hero-timer');
+    const mainTimer = document.getElementById('sale-timer-main');
+    if (heroTimer) heroTimer.textContent = timeStr;
+    if (mainTimer) mainTimer.textContent = timeStr;
+  }, 1000);
+
+  import { addToCart } from '../store';
+
+  // Global helper for quick-add buttons
+  (window as any).handleQuickAdd = (productId: string, title: string, price: number, emoji: string) => {
+    addToCart({
+      productId,
+      productTitle: title,
+      productImage: emoji, // Store emoji as placeholder image for now
+      variantLabel: 'Standard',
+      price,
+      quantity: 1
+    });
+  };
+
+  // Initialize recently viewed logic (placeholder)
+  document.addEventListener('DOMContentLoaded', () => {
+    // We could load products here if we had an API
+    console.log("Homepage initialized");
+  });
+</script>

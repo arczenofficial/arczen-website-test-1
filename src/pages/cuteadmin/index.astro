@@ -1,0 +1,105 @@
+---
+// ArcZen CuteAdmin v2.0 - Integrated Admin Panel
+// This file serves as the entry point for the admin panel following consolidation.
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcZen | Multi-Currency Admin Board</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/cuteadmin.css">
+    <!-- Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons: Phosphor Icons for Next-Gen Feel -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Charting: Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator_modern.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f171c;
+            --accent: #00C9BC;
+        }
+        .initial-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--bg-deep);
+            color: #f1f5f9;
+            font-family: 'Outfit', sans-serif;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 201, 188, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- App Root -->
+    <div id="app">
+        <!-- New Shell Structure -->
+        <div class="admin-shell">
+            <!-- Sidebar (Collapsed by default logic in JS) -->
+            <aside class="sidebar-v2" id="mainSidebar">
+                <!-- Content will be injected by UI.js -->
+            </aside>
+
+            <div class="main-wrapper">
+                <!-- Top Bar -->
+                <header class="topbar-v2" id="mainTopbar">
+                    <!-- Content will be injected by UI.js -->
+                </header>
+
+                <!-- Page Content Area -->
+                <main class="content-area-v2" id="mainContentArea">
+                    <div class="initial-loader">
+                        <div class="spinner"></div>
+                        <p>Synchronizing Ledger...</p>
+                    </div>
+                </main>
+
+                <!-- Mobile Navigation -->
+                <nav class="mobile-nav-v2" id="mobileBottomNav">
+                    <!-- Content will be injected by UI.js -->
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Tabulator JS -->
+    <script is:inline type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <!-- Toastify -->
+    <script is:inline type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- html2pdf.js bundle -->
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Explicit html2canvas -->
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Config & Secrets -->
+    <script is:inline type="module" src="/assets/js/cuteadmin/config.js"></script>
+    <!-- Main App -->
+    <script is:inline type="module" src="/assets/js/cuteadmin/app.js"></script>
+</body>
+</html>

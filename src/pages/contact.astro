@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="Contact Us | ArcZen">
+  <Header />
+
+  <div class="page active" id="page-contact">
+    <div class="container" style="padding-top:110px;padding-bottom:80px;">
+      <div class="sec-header reveal">
+        <div class="sec-tag">Get in Touch</div>
+        <h1 style="font-size:clamp(2rem,4.5vw,3.2rem);font-family:var(--font-d);font-weight:900;margin-bottom:14px">Start Your Project.</h1>
+        <p class="sec-desc">We respond to every inquiry within 24 hours. No ghosting. No vague estimates.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <p>Tell us what you need. We'll scope it, quote it, and have your first update within 48 hours of confirmation.</p>
+          <div class="contact-methods">
+            <a href="https://wa.me/8801571316610" class="c-method" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+              <div class="c-method-icon" style="background:rgba(37,211,102,0.1)">💬</div>
+              <div><div class="c-label">WhatsApp (Instant)</div><div class="c-val">+880 157 131 6610</div></div>
+            </a>
+            <a href="mailto:hello@arczen.io" class="c-method" style="text-decoration:none;">
+              <div class="c-method-icon" style="background:var(--teal-dim)">✉️</div>
+              <div><div class="c-label">Email</div><div class="c-val">hello@arczen.io</div></div>
+            </a>
+            <div class="c-method">
+              <div class="c-method-icon" style="background:rgba(245,158,11,0.1)">📍</div>
+              <div><div class="c-label">Location</div><div class="c-val">Dhaka, Bangladesh</div></div>
+            </div>
+          </div>
+          <div style="margin-top:22px;padding:18px;background:var(--teal-dim);border:1px solid rgba(14,165,233,0.2);border-radius:var(--radius);">
+            <p style="font-size:0.82rem;color:var(--teal);font-weight:700;margin-bottom:4px">⚡ Response Promise</p>
+            <p style="font-size:0.8rem;color:var(--text-2)">All inquiries answered within 24 hours. Store orders delivered within the listed time — usually under 30 minutes.</p>
+          </div>
+        </div>
+        <div>
+          <div id="contact-ok" class="f-success" style="margin-bottom:18px; display:none;">✅ Received! We'll reach out within 24 hours.</div>
+          <form id="contact-form">
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Your Name *</label><input class="f-input" name="name" placeholder="Rafiq Ahmed" required></div>
+              <div class="f-group"><label class="f-label">Email *</label><input type="email" class="f-input" name="email" placeholder="you@example.com" required></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label class="f-label">Phone (Optional)</label><input class="f-input" name="phone" placeholder="+880 1X XXXXXXX"></div>
+              <div class="f-group"><label class="f-label">Service Needed</label>
+                <select class="f-select" name="service_type">
+                  <option value="">— Select —</option>
+                  <option value="web">Web Design & Development</option>
+                  <option value="graphic">Graphic Design & Branding</option>
+                  <option value="video">Video Editing</option>
+                  <option value="bundle">Multiple Services</option>
+                  <option value="store">Store Inquiry</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-group"><label class="f-label">Budget Range</label>
+              <select class="f-select" name="budget_range">
+                <option value="">— Select —</option>
+                <option value="under_5500">Under ৳5,500 ($50)</option>
+                <option value="5500_11000">৳5,500 – ৳11,000 ($50–$100)</option>
+                <option value="11000_33000">৳11,000 – ৳33,000 ($100–$300)</option>
+                <option value="33000_66000">৳33,000 – ৳66,000 ($300–$600)</option>
+                <option value="66000_plus">৳66,000+ ($600+)</option>
+              </select>
+            </div>
+            <div class="f-group"><label class="f-label">About Your Project *</label><textarea class="f-textarea" name="message" placeholder="Describe what you need, your timeline, and any important details..." required></textarea></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center" id="contact-btn">Send Inquiry — 24hr Response →</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <CartDrawer />
+  <Footer />
+</Layout>
+
+<script>
+    document.getElementById('contact-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('contact-btn') as HTMLButtonElement;
+        btn.innerText = "Submitting...";
+        
+        // Simulating submission since backend isn't mapped to Netlify forms yet or keep it simple
+        setTimeout(() => {
+            const ok = document.getElementById('contact-ok');
+            if (ok) ok.style.display = 'block';
+            (e.target as HTMLFormElement).reset();
+            btn.innerText = "Sent Successfully ✓";
+            btn.style.background = "var(--mint)";
+            btn.disabled = true;
+        }, 800);
+    });
+</script>

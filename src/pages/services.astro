@@ -1,0 +1,103 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="Services | ArcZen Create">
+  <Header />
+
+  <div class="page active" id="page-services">
+    <div class="svc-page-head">
+      <div class="container">
+        <div class="sec-tag">Arczen Create</div>
+        <h1 style="font-size:clamp(2rem,4.5vw,3.5rem);font-family:var(--font-d);font-weight:900;margin-bottom:14px">We Build Digital.<br>You Scale.</h1>
+        <p style="font-size:1rem;color:var(--text-2);max-width:520px;margin:0 auto;line-height:1.75">Not a freelancer. Not a template farm. A studio with a process, a deadline, and a track record.</p>
+      </div>
+    </div>
+    <div class="container" style="padding-bottom:80px">
+      <div class="svc-cards">
+        <div class="svc-card">
+          <div class="svc-icon">🌐</div>
+          <div class="svc-name">Web Design & Development</div>
+          <div class="svc-desc">Custom websites built for conversion. Coded from scratch. Mobile-first. SEO-optimised. Launched in 14 business days.</div>
+          <div class="svc-price"><span class="from">From</span> <span class="bdt">৳33,000</span> <span class="usd">($300)</span></div>
+          <ul class="svc-list">
+            <li>Custom design (no templates)</li>
+            <li>Mobile-first, SEO-optimised code</li>
+            <li>2 revision rounds included</li>
+            <li>Launch in 14 business days</li>
+            <li>Source files & CMS handoff</li>
+          </ul>
+          <a href="/contact" class="btn btn-primary" style="text-decoration:none; display:inline-block; text-align:center;">Start Project →</a>
+        </div>
+        <div class="svc-card">
+          <div class="svc-icon">🎨</div>
+          <div class="svc-name">Graphic Design & Branding</div>
+          <div class="svc-desc">Logo, brand identity, social media kits, marketing materials. Every pixel has a purpose.</div>
+          <div class="svc-price"><span class="from">From</span> <span class="bdt">৳5,500</span> <span class="usd">($50)</span></div>
+          <ul class="svc-list">
+            <li>Logo in all required formats</li>
+            <li>Brand guidelines document</li>
+            <li>Social media template kit</li>
+            <li>Business card & stationery</li>
+            <li>High-res export in all formats</li>
+          </ul>
+          <a href="/contact" class="btn btn-primary" style="text-decoration:none; display:inline-block; text-align:center;">Start Project →</a>
+        </div>
+        <div class="svc-card">
+          <div class="svc-icon">🎬</div>
+          <div class="svc-name">Video Editing & Content</div>
+          <div class="svc-desc">Short-form, YouTube, promotional cuts. Optimised for retention — not just aesthetics. We cut for results.</div>
+          <div class="svc-price"><span class="from">From</span> <span class="bdt">৳3,300</span> <span class="usd">($30)</span></div>
+          <ul class="svc-list">
+            <li>Retention-optimised edit</li>
+            <li>Motion graphics & text overlays</li>
+            <li>Sound design & colour grade</li>
+            <li>Platform-specific formatting</li>
+            <li>Monthly packages available</li>
+          </ul>
+          <a href="/contact" class="btn btn-primary" style="text-decoration:none; display:inline-block; text-align:center;">Start Project →</a>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:44px;margin-bottom:80px;">
+        <div class="sec-header" style="margin-bottom:36px">
+          <div class="sec-tag">Our Process</div>
+          <h2 style="font-size:1.8rem;font-family:var(--font-d);font-weight:800">How We Work</h2>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;">
+          <!-- Process Steps layout inline for easy responsiveness -->
+          <style>@media(max-width:768px){.process-grid{grid-template-columns:1fr !important; gap: 30px;}}</style>
+          <div class="process-grid" style="display:contents;">
+              <div style="text-align:center;">
+                <div style="width:46px;height:46px;background:var(--teal-dim);border:1px solid rgba(14,165,233,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;color:var(--teal);margin:0 auto 14px;font-size:1rem;">01</div>
+                <h4 style="font-size:0.9rem;font-family:var(--font-d);margin-bottom:6px;">Brief</h4>
+                <p style="font-size:0.8rem;color:var(--text-3);">5 fields, no endless back-and-forth. We scope accurately.</p>
+              </div>
+              <div style="text-align:center;">
+                <div style="width:46px;height:46px;background:var(--mint-dim);border:1px solid rgba(16,185,129,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;color:var(--mint);margin:0 auto 14px;font-size:1rem;">02</div>
+                <h4 style="font-size:0.9rem;font-family:var(--font-d);margin-bottom:6px;">Draft</h4>
+                <p style="font-size:0.8rem;color:var(--text-3);">Initial design delivered within 5 days for review.</p>
+              </div>
+              <div style="text-align:center;">
+                <div style="width:46px;height:46px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;color:var(--gold);margin:0 auto 14px;font-size:1rem;">03</div>
+                <h4 style="font-size:0.9rem;font-family:var(--font-d);margin-bottom:6px;">Refine</h4>
+                <p style="font-size:0.8rem;color:var(--text-3);">Two rounds of revision to ensure perfection.</p>
+              </div>
+              <div style="text-align:center;">
+                <div style="width:46px;height:46px;background:var(--rose-dim);border:1px solid rgba(244,63,94,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;color:var(--rose);margin:0 auto 14px;font-size:1rem;">04</div>
+                <h4 style="font-size:0.9rem;font-family:var(--font-d);margin-bottom:6px;">Deliver</h4>
+                <p style="font-size:0.8rem;color:var(--text-3);">Final source files & live launch on day 14.</p>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <CartDrawer />
+  <Footer />
+</Layout>

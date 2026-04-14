@@ -1,0 +1,729 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="Checkout | ArcZen Premium Store">
+    <Header />
+
+    <main class="checkout-page">
+        <div class="container checkout-container">
+            <!-- STEPS INDICATOR -->
+            <div class="checkout-steps">
+                <div class="step active" id="step-1">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Details</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step-2">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Payment</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step-3">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Confirm</span>
+                </div>
+            </div>
+
+            <div id="checkout-auth-warning" class="auth-warning hidden">
+                <div class="warning-content">
+                    <span class="warning-icon">🔐</span>
+                    <div class="warning-text">
+                        <p>Log in to complete your order and track delivery status.</p>
+                        <a href="/account/login?redirect=/checkout" class="btn-login-link">Login & Continue</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="checkout-verify-warning" class="auth-warning hidden" style="background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3);">
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <div class="warning-text">
+                        <p style="color:#fca5a5;">Please verify your email before placing an order.</p>
+                        <button id="resend-verify-btn" class="btn-login-link" style="background:#ef4444; color:white; border:none; cursor:pointer; margin-right:10px;">Resend Verification Email</button>
+                        <button id="refresh-verify-btn" class="btn-login-link" style="background:#3b82f6; color:white; border:none; cursor:pointer;">I Have Verified</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-grid">
+                <!-- LEFT: FORMS -->
+                <div class="checkout-main">
+                    <section class="checkout-section active" id="section-details">
+                        <div class="section-head">
+                            <div class="currency-header">
+                                <h2 class="h-sec">Shipping & Delivery</h2>
+                                <div class="currency-toggle" id="currency-switcher">
+                                    <button class="cur-btn active" data-currency="bdt">🇧🇩 BDT</button>
+                                    <button class="cur-btn" data-currency="usd">🇺🇸 USD</button>
+                                </div>
+                            </div>
+                            <p class="h-sub">Provide your delivery details securely.</p>
+                        </div>
+                        <div class="checkout-form">
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Recipient Name</label>
+                                    <input type="text" id="custName" placeholder="Full Name" />
+                                </div>
+                                <div class="field-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="custPhone" placeholder="01XXXXXXXXX" />
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label>Delivery Address / Instructions</label>
+                                <textarea id="custAddress" placeholder="House #, Street, Area, City..." rows="3"></textarea>
+                            </div>
+
+                            <div class="section-actions">
+                                <button class="btn-next" id="goto-payment">Continue to Payment</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="checkout-section" id="section-payment">
+                        <div class="section-head">
+                            <h2 class="h-sec">Payment Method</h2>
+                            <p class="h-sub">Secure manual payment via Mobile Banking.</p>
+                        </div>
+
+                        <div class="payment-methods" id="bdt-payment-methods">
+                            <button class="pay-method active" data-method="bkash">
+                                <img src="https://raw.githubusercontent.com/itsmishfakat/arczen-assets/main/bkash.png" alt="bKash" />
+                                <span>bKash</span>
+                            </button>
+                            <button class="pay-method" data-method="nagad">
+                                <img src="https://raw.githubusercontent.com/itsmishfakat/arczen-assets/main/nagad.png" alt="Nagad" />
+                                <span>Nagad</span>
+                            </button>
+                        </div>
+
+                        <div class="payment-methods hidden" id="usd-payment-methods">
+                            <button class="pay-method" data-method="paypal">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" style="height: 20px" />
+                                <span>PayPal</span>
+                            </button>
+                            <button class="pay-method" data-method="payoneer">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/Payoneer_logo.svg" alt="Payoneer" style="height: 20px" />
+                                <span>Payoneer</span>
+                            </button>
+                        </div>
+
+                        <div class="payment-box" id="payment-instructions-bdt">
+                            <div class="instr-header">
+                                <span class="instr-method" id="instr-method-name">bKash</span> Send Money Instructions
+                            </div>
+                            <ul class="instr-list">
+                                <li>Open your <strong id="instr-app">bKash</strong> app or dial *247#</li>
+                                <li>Choose <strong>Send Money</strong></li>
+                                <li>Enter Recipient Number: <strong class="copyable" id="instr-number">01571316610</strong></li>
+                                <li>Enter Amount: <strong id="instr-amount">৳0</strong></li>
+                                <li>Complete payment and copy the <strong>Transaction ID (TrxID)</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="payment-box hidden" id="payment-instructions-usd">
+                            <div class="instr-header">
+                                <span id="instr-method-name-usd">PayPal</span> International Transfer
+                            </div>
+                            <ul class="instr-list">
+                                <li>Send payment to: <strong class="copyable">payment@arczen.com</strong></li>
+                                <li>Amount: <strong id="instr-amount-usd">$0.00</strong></li>
+                                <li>Select "Service / Purchase" option</li>
+                                <li>Add your **Order Reference** in the note</li>
+                                <li>Capture the <strong>Transaction ID</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="verification-form">
+                            <div id="bdt-verify-fields">
+                                <div class="field-group">
+                                    <label>Your Account Number (Sender)</label>
+                                    <input type="tel" id="senderNum" placeholder="01XXXXXXXXX" />
+                                </div>
+                                <div class="field-group" style="margin-top: 15px;">
+                                    <label>Transaction ID (TrxID)</label>
+                                    <input type="text" id="trxId" placeholder="e.g. 8KXXJ9LQ4W" class="uppercase" />
+                                </div>
+                            </div>
+
+                            <div id="usd-verify-fields" class="hidden">
+                                <div class="field-group">
+                                    <label>Your PayPal / Payoneer Email</label>
+                                    <input type="email" id="senderEmail" placeholder="yourname@email.com" />
+                                </div>
+                                <div class="field-group" style="margin-top: 15px;">
+                                    <label>Payment Transaction ID</label>
+                                    <input type="text" id="trxIdUsd" placeholder="e.g. 5BT74XXXXX" class="uppercase" />
+                                </div>
+                            </div>
+
+                            <div class="section-actions">
+                                <button class="btn-back" id="back-to-details">Back</button>
+                                <button class="btn-next" id="placeOrderBtn">Confirm & Place Order</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- RIGHT: SUMMARY -->
+                <aside class="checkout-sidebar">
+                    <div class="summary-card">
+                        <h3 class="sum-title">Secure Checkout</h3>
+                        <div class="sum-items" id="checkout-items">
+                            <!-- Items injection -->
+                            <p class="sum-empty">Your cart is empty...</p>
+                        </div>
+                        
+                        <div class="sum-calc">
+                            <div class="sum-row">
+                                <span>Subtotal</span>
+                                <span id="sum-subtotal">৳0</span>
+                            </div>
+
+                            <div class="sum-row hidden" id="chargeRow">
+                                <span id="chargeLabel">Processing Fee</span>
+                                <span id="sum-charge">৳0</span>
+                            </div>
+                            <div class="sum-row total">
+                                <span>Total Payable</span>
+                                <span id="sum-total">৳0</span>
+                            </div>
+                        </div>
+
+                        <div class="safe-badge">
+                            <div class="safe-icon">🛡️</div>
+                            <div class="safe-text">
+                                <strong>Secured Checkout</strong>
+                                <p>Encrypted by 256-bit SSL</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <Footer />
+    <CartDrawer />
+</Layout>
+
+<style>
+    .checkout-page { padding-top: 140px; padding-bottom: 80px; background: #080a0c; color: #f5f2eb; min-height: 100vh; }
+    .checkout-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Currency Toggle */
+    .currency-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .currency-toggle { display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(198,167,94,0.15); border-radius: 12px; padding: 4px; gap: 4px; }
+    .cur-btn { border: none; background: none; color: #9a9387; font-size: 0.75rem; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .cur-btn.active { background: #c6a75e; color: #1a1200; box-shadow: 0 4px 12px rgba(198,167,94,0.2); }
+    .cur-btn:hover:not(.active) { background: rgba(255,255,255,0.1); color: #f5f2eb; }
+
+    /* Steps */
+    .checkout-steps { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 60px; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.3; transition: all 0.3s; }
+    .step.active { opacity: 1; }
+    .step-num { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; }
+    .step.active .step-num { background: #c6a75e; color: #1a1200; border-color: #c6a75e; box-shadow: 0 0 20px rgba(198,167,94,0.3); }
+    .step-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9a9387; }
+    .step.active .step-label { color: #c6a75e; }
+    .step-line { width: 60px; height: 1px; background: rgba(255,255,255,0.1); }
+
+    /* Grid */
+    .checkout-grid { display: grid; grid-template-columns: 1fr 400px; gap: 40px; }
+    @media (max-width: 1024px) { .checkout-grid { grid-template-columns: 1fr; } .checkout-page { padding-top: 100px; } }
+
+    /* Sections */
+    .checkout-section { display: none; background: rgba(26,23,20,0.85); border: 1px solid rgba(198,167,94,0.15); border-radius: 20px; padding: 40px; backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .checkout-section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-head { margin-bottom: 30px; border-bottom: 1px solid rgba(198,167,94,0.1); padding-bottom: 20px; }
+    .h-sec { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: #f5f2eb; margin-bottom: 8px; }
+    .h-sub { color: #9a9387; font-size: 0.95rem; }
+
+    /* Forms */
+    .checkout-form, .verification-form { display: flex; flex-direction: column; gap: 20px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-group label { font-size: 0.8rem; font-weight: 700; color: #c6a75e; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field-group input, .field-group textarea { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(198,167,94,0.15); border-radius: 12px; padding: 14px 18px; color: #f5f2eb; font-size: 1rem; font-family: inherit; outline: none; transition: all 0.2s; }
+    .field-group input:focus, .field-group textarea:focus { border-color: rgba(198,167,94,0.5); background: rgba(255,255,255,0.05); }
+
+    .section-actions { margin-top: 30px; display: flex; gap: 15px; }
+    .btn-next { flex: 1; background: linear-gradient(135deg, #c6a75e, #e8c87a); color: #1a1200; border: none; padding: 18px; border-radius: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.3s; font-family: inherit; }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(198,167,94,0.4); }
+    .btn-back { width: 120px; background: rgba(255,255,255,0.05); color: #9a9387; border: 1px solid rgba(198,167,94,0.15); border-radius: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-back:hover { background: rgba(255,255,255,0.08); color: #f5f2eb; }
+
+    /* Payment */
+    .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+    .pay-method { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(198,167,94,0.15); border-radius: 16px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.2s; filter: grayscale(1); opacity: 0.6; }
+    .pay-method.active { filter: grayscale(0); opacity: 1; border-color: #c6a75e; background: rgba(198,167,94,0.08); }
+    .pay-method img { height: 28px; object-fit: contain; }
+    .pay-method span { font-weight: 700; font-size: 1rem; color: #f5f2eb; }
+
+    .payment-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(198,167,94,0.1); border-radius: 16px; padding: 24px; margin-bottom: 30px; }
+    .instr-header { font-weight: 800; color: #c6a75e; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.05em; }
+    .instr-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; color: #9a9387; }
+    .instr-list strong { color: #f5f2eb; }
+    .copyable { color: #c6a75e !important; background: rgba(198,167,94,0.1); padding: 2px 6px; border-radius: 6px; cursor: pointer; border: 1px dashed rgba(198,167,94,0.3); }
+
+    /* Sidebar Summary */
+    .checkout-sidebar { position: sticky; top: 140px; height: fit-content; }
+    .summary-card { background: rgba(26,23,20,0.85); border: 1px solid rgba(198,167,94,0.15); border-radius: 20px; padding: 30px; backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .sum-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; border-bottom: 1px solid rgba(198,167,94,0.1); padding-bottom: 15px; }
+    .sum-items { max-height: 280px; overflow-y: auto; margin-bottom: 24px; scrollbar-width: none; }
+    .sum-items::-webkit-scrollbar { display: none; }
+    .sum-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .sum-img { width: 50px; height: 50px; border-radius: 10px; background-size: cover; background-position: center; flex-shrink: 0; background-color: #000; border: 1px solid rgba(255,255,255,0.05); }
+    .sum-info { flex: 1; }
+    .sum-name { font-size: 0.85rem; font-weight: 700; line-height: 1.3; color: #f5f2eb; }
+    .sum-variant { font-size: 0.7rem; color: #9a9387; margin-top: 2px; }
+    .sum-price { font-size: 0.85rem; font-weight: 800; color: #c6a75e; margin-top: 4px; }
+
+    .sum-calc { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+    .sum-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #9a9387; }
+    .sum-row.total { border-top: 1px solid rgba(198,167,94,0.15); padding-top: 20px; font-size: 1.4rem; font-weight: 900; color: #c6a75e; }
+
+    .safe-badge { display: flex; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(198,167,94,0.1); }
+    .safe-icon { width: 44px; height: 44px; background: rgba(16,185,129,0.1); color: #10b981; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .safe-text strong { display: block; font-size: 0.85rem; color: #10b981; margin-bottom: 2px; }
+    .safe-text p { font-size: 0.75rem; color: #9a9387; margin: 0; }
+
+    /* Auth Warning */
+    .auth-warning { background: rgba(198,167,94,0.08); border: 1px solid rgba(198,167,94,0.15); border-radius: 16px; padding: 20px; margin-bottom: 30px; }
+    .warning-content { display: flex; align-items: center; gap: 15px; }
+    .warning-icon { font-size: 1.6rem; }
+    .warning-text p { font-size: 0.9rem; color: #f5f2eb; margin: 0 0 10px 0; }
+    .btn-login-link { display: inline-block; background: #c6a75e; color: #1a1200; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 0.8rem; transition: all 0.2s; }
+    .btn-login-link:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(198,167,94,0.3); }
+
+    .hidden { display: none !important; }
+</style>
+
+<script>
+    import { cartItems, clearCart, removeOrderedItems } from '../store';
+    import { clientAuth, clientDb } from '../lib/firebase-client';
+    import { onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
+    import { collection, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+
+    // UI ELEMENTS
+    const steps = {
+        details: document.getElementById('step-1'),
+        payment: document.getElementById('step-2'),
+        confirm: document.getElementById('step-3')
+    };
+    const sections = {
+        details: document.getElementById('section-details'),
+        payment: document.getElementById('section-payment')
+    };
+    const itemsContainer = document.getElementById('checkout-items');
+    const elSubtotal = document.getElementById('sum-subtotal');
+    const elTotal = document.getElementById('sum-total');
+    const instrAmount = document.getElementById('instr-amount');
+
+    let currentStep = 1;
+    let currentUser: any = null;
+    let selectedMethod = 'bkash';
+    let deliveryFee = 0; // Digital/online delivery — no physical shipping fee
+    let currency = 'bdt';
+    
+    // Settings state
+    let bdtRate = 120;
+    let paymentFees = {
+        bkash: 0,
+        nagad: 0,
+        usd: 0
+    };
+
+    // --- Fetch Global Settings (called after auth resolves to avoid permission errors) ---
+    async function loadSettings() {
+        try {
+            const snap = await getDoc(doc(clientDb, 'settings', 'company'));
+            if (snap.exists()) {
+                const data = snap.data();
+                bdtRate = data.bdtUsdRate || 120;
+                paymentFees = {
+                    bkash: data.bkashFee || 0,
+                    nagad: data.nagadFee || 0,
+                    usd: data.usdPaymentFee || 0
+                };
+                updateTotalDisplay();
+            }
+        } catch(e) { console.error('E-Settings-Load', e); }
+    }
+
+    // --- State & Auth ---
+    onAuthStateChanged(clientAuth, async (user) => {
+        currentUser = user;
+        const warning = document.getElementById('checkout-auth-warning');
+        const verifyWarning = document.getElementById('checkout-verify-warning');
+        if (!user) {
+            warning?.classList.remove('hidden');
+            verifyWarning?.classList.add('hidden');
+            document.getElementById('placeOrderBtn')?.setAttribute('disabled', 'true');
+        } else {
+            warning?.classList.add('hidden');
+            if (!user.emailVerified) {
+                verifyWarning?.classList.remove('hidden');
+                document.getElementById('placeOrderBtn')?.setAttribute('disabled', 'true');
+            } else {
+                verifyWarning?.classList.add('hidden');
+                document.getElementById('placeOrderBtn')?.removeAttribute('disabled');
+            }
+            // Load settings now that we have an authenticated user (avoids permission error)
+            loadSettings();
+            // Pre-fill from profile
+            try {
+                const snap = await getDoc(doc(clientDb, 'customers', user.uid));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    (document.getElementById('custName') as HTMLInputElement).value = data.name || user.displayName || '';
+                    (document.getElementById('custPhone') as HTMLInputElement).value = data.phone || '';
+                    
+                    // Resolve delivery address: addresses may be an array of strings or objects
+                    const addresses = data.addresses || [];
+                    let resolvedAddress = '';
+                    if (addresses.length > 0) {
+                        const homeAddr = addresses.find((a: any) => typeof a === 'object' && a !== null && (a.label?.toLowerCase() === 'home' || a.type?.toLowerCase() === 'home'));
+                        const first = addresses[0];
+                        const candidate = homeAddr || first;
+                        if (typeof candidate === 'string') {
+                            resolvedAddress = candidate;
+                        } else if (typeof candidate === 'object' && candidate !== null) {
+                            // Build a readable address string from the object fields
+                            resolvedAddress = [
+                                candidate.street || candidate.address || candidate.line1 || '',
+                                candidate.area   || candidate.city    || '',
+                                candidate.district || candidate.region || '',
+                                candidate.zip    || candidate.postal  || ''
+                            ].filter(Boolean).join(', ');
+                        }
+                    }
+                    (document.getElementById('custAddress') as HTMLTextAreaElement).value = resolvedAddress;
+                }
+            } catch(e) { console.error('E-Profile-Prefill', e); }
+        }
+    });
+
+    // --- Steps Logic ---
+    document.getElementById('goto-payment')?.addEventListener('click', () => {
+        const name = (document.getElementById('custName') as HTMLInputElement).value.trim();
+        const phone = (document.getElementById('custPhone') as HTMLInputElement).value.trim();
+        if (!name || !phone) { alert('Please enter name and phone number.'); return; }
+        
+        currentStep = 2;
+        steps.payment?.classList.add('active');
+        sections.details?.classList.remove('active');
+        sections.payment?.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('back-to-details')?.addEventListener('click', () => {
+        currentStep = 1;
+        steps.payment?.classList.remove('active');
+        sections.payment?.classList.remove('active');
+        sections.details?.classList.add('active');
+    });
+
+
+    // --- Currency Switcher ---
+    document.querySelectorAll('#currency-switcher button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.currentTarget as HTMLElement;
+            document.querySelectorAll('#currency-switcher button').forEach(b => b.classList.remove('active'));
+            target.classList.add('active');
+            
+            currency = target.dataset.currency || 'bdt';
+            
+            // Toggle UI elements
+            const bdtMethods = document.getElementById('bdt-payment-methods');
+            const usdMethods = document.getElementById('usd-payment-methods');
+            const bdtInstr = document.getElementById('payment-instructions-bdt');
+            const usdInstr = document.getElementById('payment-instructions-usd');
+            const areaSelector = document.getElementById('areaSelector');
+
+            if (currency === 'usd') {
+                bdtMethods?.classList.add('hidden');
+                usdMethods?.classList.remove('hidden');
+                bdtInstr?.classList.add('hidden');
+                usdInstr?.classList.remove('hidden');
+                document.getElementById('bdt-verify-fields')?.classList.add('hidden');
+                document.getElementById('usd-verify-fields')?.classList.remove('hidden');
+                deliveryFee = 0;
+                selectedMethod = 'paypal';
+                document.querySelectorAll('#usd-payment-methods .pay-method').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-method="paypal"]')?.classList.add('active');
+            } else {
+                bdtMethods?.classList.remove('hidden');
+                usdMethods?.classList.add('hidden');
+                bdtInstr?.classList.remove('hidden');
+                usdInstr?.classList.add('hidden');
+                document.getElementById('bdt-verify-fields')?.classList.remove('hidden');
+                document.getElementById('usd-verify-fields')?.classList.add('hidden');
+                deliveryFee = 0;
+                selectedMethod = 'bkash';
+                document.querySelectorAll('#bdt-payment-methods .pay-method').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-method="bkash"]')?.classList.add('active');
+            }
+            
+            updateTotalDisplay();
+        });
+    });
+
+    // --- Payment Switcher ---
+    document.querySelectorAll('.pay-method').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.currentTarget as HTMLElement;
+            const parent = target.parentElement;
+            parent?.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
+            target.classList.add('active');
+            selectedMethod = target.dataset.method || 'bkash';
+            
+            // UI Updates
+            if (currency === 'bdt') {
+                const instrName = document.getElementById('instr-method-name');
+                const instrApp = document.getElementById('instr-app');
+                const instrNum = document.getElementById('instr-number');
+                
+                const name = selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1);
+                if (instrName) instrName.textContent = name;
+                if (instrApp) instrApp.textContent = name;
+                
+                // Numbers to use (could be dynamic but currently hardcoded)
+                if (instrNum) {
+                    instrNum.textContent = selectedMethod === 'nagad' ? '01712345678' : '01571316610';
+                }
+            } else {
+                const instrNameUsd = document.getElementById('instr-method-name-usd');
+                if (instrNameUsd) instrNameUsd.textContent = selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1);
+            }
+
+            updateTotalDisplay();
+        });
+    });
+
+    // --- Cart Integration ---
+    cartItems.subscribe(items => {
+        if (!itemsContainer) return;
+        if (items.length === 0) {
+            itemsContainer.innerHTML = '<p class="sum-empty">Cart is empty...</p>';
+            return;
+        }
+
+        let total = 0;
+        itemsContainer.innerHTML = items.map(item => {
+            total += item.price * item.quantity;
+            return `
+                <div class="sum-item">
+                    <div class="sum-img" style="background-image: url(${item.productImage || '/images/placeholder.png'})"></div>
+                    <div class="sum-info">
+                        <div class="sum-name">${item.productTitle}</div>
+                        <div class="sum-variant">${item.variantLabel || 'Standard'} x ${item.quantity}</div>
+                        <div class="sum-price">৳${(item.price * item.quantity).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        updateTotalDisplay();
+    });
+
+    function updateTotalDisplay() {
+        const items = cartItems.get();
+        const subtotalBdt = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        
+        if (currency === 'bdt') {
+            // No delivery fee — digital/online product
+            const isLocalNagad = selectedMethod === 'nagad';
+            const feePercent = isLocalNagad ? (paymentFees.nagad || 0) : (paymentFees.bkash || 0);
+            const processingCharge = Math.ceil(subtotalBdt * (feePercent / 100));
+            const total = subtotalBdt + processingCharge;
+
+            if (elSubtotal) elSubtotal.textContent = `৳${subtotalBdt.toLocaleString()}`;
+            if (elTotal) elTotal.textContent = `৳${total.toLocaleString()}`;
+            if (instrAmount) instrAmount.textContent = `৳${total.toLocaleString()}`;
+            
+            const chargeEl = document.getElementById('sum-charge');
+            const chargeRow = document.getElementById('chargeRow');
+            if (processingCharge > 0) {
+                if (chargeEl) chargeEl.textContent = `৳${processingCharge.toLocaleString()}`;
+                chargeRow?.classList.remove('hidden');
+            } else {
+                chargeRow?.classList.add('hidden');
+            }
+        } else {
+            // Calculation for USD
+            const subtotalUsd = subtotalBdt / bdtRate;
+            const feePercentUsd = paymentFees.usd || 0;
+            const processingChargeUsd = subtotalUsd * (feePercentUsd / 100);
+            const totalUsd = subtotalUsd + processingChargeUsd;
+
+            if (elSubtotal) elSubtotal.textContent = `$${subtotalUsd.toFixed(2)}`;
+            if (elTotal) elTotal.textContent = `$${totalUsd.toFixed(2)}`;
+            
+            const chargeEl = document.getElementById('sum-charge');
+            const chargeRow = document.getElementById('chargeRow');
+            if (processingChargeUsd > 0) {
+                if (chargeEl) chargeEl.textContent = `$${processingChargeUsd.toFixed(2)}`;
+                chargeRow?.classList.remove('hidden');
+            } else {
+                chargeRow?.classList.add('hidden');
+            }
+
+            const instrAmountUsd = document.getElementById('instr-amount-usd');
+            if (instrAmountUsd) instrAmountUsd.textContent = `$${totalUsd.toFixed(2)}`;
+        }
+    }
+
+    // --- Place Order ---
+    document.getElementById('placeOrderBtn')?.addEventListener('click', async (e) => {
+        const isUSD = currency === 'usd';
+
+        // Safe DOM reads — guard against null elements
+        const senderEl = isUSD
+            ? (document.getElementById('senderEmail') as HTMLInputElement | null)
+            : (document.getElementById('senderNum') as HTMLInputElement | null);
+        const trxEl = isUSD
+            ? (document.getElementById('trxIdUsd') as HTMLInputElement | null)
+            : (document.getElementById('trxId') as HTMLInputElement | null);
+
+        const sender  = senderEl?.value?.trim() ?? '';
+        const trxId   = (trxEl?.value?.trim() ?? '').toUpperCase();
+
+        if (!sender || !trxId) {
+            alert(isUSD
+                ? 'Please provide your PayPal/Payoneer email and Transaction ID.'
+                : 'Please provide Sender Number and TrxID.');
+            return;
+        }
+
+        const btn = e.currentTarget as HTMLButtonElement;
+        btn.disabled = true;
+        btn.textContent = 'Processing Order...';
+
+        try {
+            let rawItems;
+            try {
+                rawItems = cartItems.get();
+            } catch (storageError) {
+                console.error("Cart Storage Parse Error:", storageError);
+                cartItems.set([]); // Reset the corrupted store
+                rawItems = [];
+            }
+
+            // Filter out any corrupt/legacy cart entries that are missing productId
+            const items = (Array.isArray(rawItems) ? rawItems : []).filter(
+                (i: any) => i && typeof i?.productId === 'string' && i.productId.trim().length > 0
+            );
+
+            if (items.length === 0) {
+                cartItems.set([]); // Force clean cart state for future clicks
+                throw new Error('Cart is empty or contains corrupted items. We have reset the cart. Please re-add your products.');
+            }
+
+            if (currentUser && !currentUser.emailVerified) {
+                throw new Error('You must verify your email before placing orders.');
+            }
+
+            const customerName    = (document.getElementById('custName') as HTMLInputElement | null)?.value?.trim() ?? '';
+            const customerPhone   = (document.getElementById('custPhone') as HTMLInputElement | null)?.value?.trim() ?? '';
+            const deliveryAddress = (document.getElementById('custAddress') as HTMLTextAreaElement | null)?.value?.trim() ?? '';
+
+            if (!customerName || !customerPhone) {
+                throw new Error('Please go back and enter your recipient name and phone number.');
+            }
+
+            const orderedItemIds = items.map((i: any) => String(i.id ?? ''));
+
+            const orderPayload = {
+                customerId:      currentUser?.uid || 'guest',
+                customerName,
+                customerPhone,
+                deliveryAddress,
+                items: items.map((i: any) => ({
+                    productId: String(i.productId),
+                    quantity:  Number(i.quantity) || 1,
+                    variant:   typeof i.variantLabel === 'string' ? i.variantLabel : 'Standard'
+                })),
+                currency:       currency  || 'bdt',
+                paymentMethod:  selectedMethod || 'bkash',
+                paymentSender:  sender,
+                paymentTrxId:   trxId
+            };
+
+            let idToken = '';
+            if (currentUser) {
+                idToken = await currentUser.getIdToken();
+            }
+
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken ? `Bearer ${idToken}` : ''
+                },
+                body: JSON.stringify(orderPayload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Server rejected checkout');
+            }
+
+            // Remove only the ordered items — other cart items remain
+            removeOrderedItems(orderedItemIds);
+            window.location.href = `/account/profile?tab=orders&success=1&id=${result.orderId}`;
+
+        } catch(err: any) {
+            console.error('E-Order', err);
+            alert(`Order failed: ${err?.message || 'Please try again.'}`);
+            btn.disabled = false;
+            btn.textContent = 'Confirm & Place Order';
+        }
+    });
+
+    // --- Copy Instructions ---
+    document.getElementById('instr-number')?.addEventListener('click', (e) => {
+        const num = (e.target as HTMLElement).textContent || '';
+        navigator.clipboard.writeText(num);
+        alert('Number copied: ' + num);
+    });
+
+    // --- Verification Buttons ---
+    document.getElementById('resend-verify-btn')?.addEventListener('click', async () => {
+        if (currentUser) {
+            try {
+                await sendEmailVerification(currentUser);
+                alert('Verification email has been sent. Check your inbox.');
+            } catch (err: any) {
+                console.error(err);
+                if (err.code === 'auth/too-many-requests') {
+                    alert('Too many requests. Please wait a few minutes before trying again.');
+                } else {
+                    alert('Failed to send verification email. Try again later.');
+                }
+            }
+        }
+    });
+
+    document.getElementById('refresh-verify-btn')?.addEventListener('click', async () => {
+        if (currentUser) {
+            await currentUser.reload();
+            if (currentUser.emailVerified) {
+                document.getElementById('checkout-verify-warning')?.classList.add('hidden');
+                document.getElementById('placeOrderBtn')?.removeAttribute('disabled');
+                alert('Email verified successfully! You can now place orders.');
+            } else {
+                alert('Email is not verified yet. Please check your inbox.');
+            }
+        }
+    });
+</script>

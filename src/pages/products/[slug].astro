@@ -1,0 +1,415 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CartDrawer from '../../components/CartDrawer.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const products = await getCollection('products');
+  return products.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const p = entry.data;
+
+// Fetch related products
+const allProducts = await getCollection('products');
+const relatedProducts = allProducts
+  .filter(item => item.data.category === p.category && item.slug !== entry.slug)
+  .slice(0, 4);
+
+// Calculate discount if applicable
+const hasDiscount = p.on_sale && p.sale_price;
+const discountPercent = hasDiscount ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+---
+
+<Layout title={`${p.title} | ArcZen Store`}>
+  <Header />
+
+  <main class="product-page" data-pid={p.productId}>
+    <div class="container pb-80">
+      <!-- BREADCRUMBS -->
+      <nav class="breadcrumbs">
+        <a href="/">Home</a> <span>/</span>
+        <a href="/store">Store</a> <span>/</span>
+        <a href={`/store?cat=${p.category}`}>{p.category.charAt(0).toUpperCase() + p.category.slice(1)}</a> <span>/</span>
+        <span class="current">{p.title}</span>
+      </nav>
+
+      <div class="product-grid">
+        <!-- LEFT: GALLERY -->
+        <div class="product-visuals">
+          <div class="main-image-container">
+            {p.badge && <span class="badge-float">{p.badge}</span>}
+            <div class="main-image-bg" id="main-product-img" style={p.image ? `background-image: url(${p.image}); background-size: cover;` : ""}>
+                 {!p.image && <span class="emoji-large">💎</span>}
+            </div>
+          </div>
+          {p.gallery && p.gallery.length > 0 && (
+            <div class="thumbnail-grid">
+              <div class="thumb active" data-img={p.image} style={`background-image: url(${p.image})`}></div>
+              {p.gallery.map(img => (
+                <div class="thumb" data-img={img} style={`background-image: url(${img})`}></div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- RIGHT: ACTIONS -->
+        <div class="product-actions-col">
+          <div class="product-header-info">
+             <div class="meta-top">
+                <span class="trust-tag">Verified Product ✓</span>
+                <span class="stock-tag">{p.in_stock ? 'In Stock' : 'Out of Stock'}</span>
+             </div>
+             <h1 class="product-title">{p.title}</h1>
+             <div class="product-rating-row">
+                <span class="stars">★★★★★</span>
+                <span class="rating-val">{p.trust_score}% Positive Feedback</span>
+                <span class="divider"></span>
+                <span class="sold-count">{p.reviews_count}+ Reviews</span>
+             </div>
+          </div>
+
+          <div class="price-section">
+            <div class="current-price" id="display-price">
+               ৳{(hasDiscount ? p.sale_price : p.price).toLocaleString()}
+            </div>
+            {hasDiscount && (
+              <div class="old-price-row">
+                <span class="old-price">৳{p.price.toLocaleString()}</span>
+                <span class="save-tag">SAVE {discountPercent}%</span>
+              </div>
+            )}
+          </div>
+
+          <p class="short-desc">{p.short_description}</p>
+
+          <!-- VARIANT SELECTOR -->
+          {p.variants && p.variants.length > 0 && (
+            <div class="variant-selector">
+              <label>Select Plan</label>
+              <div class="variant-options">
+                {p.variants.map((v, i) => (
+                  <button 
+                    class={`variant-btn ${i === 0 ? 'active' : ''}`}
+                    data-price={v.sale_price || v.price}
+                    data-label={v.label}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- CTA ACTIONS -->
+          <div class="main-ctas">
+             <button class="btn-buy-now" id="buy-now-trigger">Buy Now</button>
+             <button class="btn-add-cart" id="add-cart-trigger">
+                <span class="icon">🛒</span> Add to Cart
+             </button>
+             <button class="btn-wishlist">
+                <span class="icon">♥</span>
+             </button>
+          </div>
+
+          <!-- TRUST SIGNALS -->
+          <div class="trust-grid-mini">
+             <div class="trust-mini-item">
+                <span class="tm-icon">⚡</span>
+                <div>
+                   <strong>Instant Delivery</strong>
+                   <p>Works in 2-30 mins</p>
+                </div>
+             </div>
+             <div class="trust-mini-item">
+                <span class="tm-icon">🛡️</span>
+                <div>
+                   <strong>Buyer Protection</strong>
+                   <p>24h Refund Policy</p>
+                </div>
+             </div>
+          </div>
+
+          <!-- URGENCY -->
+          <div class="urgency-banner">
+             🔥 <strong>Hot Item!</strong> <span id="view-count">12</span> people are looking at this right now.
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SECTIONS -->
+       <div class="product-details-tabs">
+          <div class="tabs-header">
+             <button class="tab-btn active" data-tab="desc">Description</button>
+             <button class="tab-btn" data-tab="works">How it Works</button>
+             <button class="tab-btn" data-tab="reviews">Reviews</button>
+          </div>
+          <div class="tab-content" id="tab-v-desc">
+             <div class="prose">
+                <Content />
+             </div>
+          </div>
+       </div>
+
+       <!-- RELATED PRODUCTS -->
+       {relatedProducts.length > 0 && (
+          <section class="related-section">
+             <h2 class="h-sec">You might also like</h2>
+             <div class="related-grid">
+                {relatedProducts.map(item => (
+                   <a href={`/products/${item.slug}`} class="rel-card">
+                      <div class="rel-img" style={item.data.image ? `background-image: url(${item.data.image})` : ""}>
+                         {!item.data.image && <span>💎</span>}
+                      </div>
+                      <div class="rel-body">
+                         <h4>{item.data.title}</h4>
+                         <div class="rel-price">৳{item.data.price.toLocaleString()}</div>
+                      </div>
+                   </a>
+                ))}
+             </div>
+          </section>
+       )}
+
+    </div>
+  </main>
+
+  <CartDrawer />
+  <Footer />
+</Layout>
+
+<style>
+  .product-page { padding-top: 140px; background: #080a0c; color: #f5f2eb; }
+  .pb-80 { padding-bottom: 80px; }
+
+  /* Breadcrumbs */
+  .breadcrumbs { display: flex; gap: 8px; font-size: 0.85rem; color: #9a9387; margin-bottom: 30px; }
+  .breadcrumbs a { color: #9a9387; text-decoration: none; }
+  .breadcrumbs a:hover { color: #c6a75e; }
+  .breadcrumbs .current { color: #f5f2eb; font-weight: 600; }
+
+  /* Main Grid */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-bottom: 80px; }
+  @media (max-width: 1024px) { 
+    .product-grid { grid-template-columns: 1fr; gap: 40px; } 
+    .product-page { padding-top: 100px; }
+  }
+
+  /* Visuals */
+  .main-image-container { 
+    background: #12141a; 
+    border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 30px; 
+    height: 500px; 
+    position: relative; 
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .main-image-bg { width: 100%; height: 100%; background-position: center; background-repeat: no-repeat; transition: background-image 0.3s ease; }
+  .emoji-large { font-size: 8rem; opacity: 0.1; }
+  .badge-float { position: absolute; top: 24px; left: 24px; background: #c6a75e; color: #1a1200; padding: 6px 14px; border-radius: 100px; font-weight: 800; font-size: 0.8rem; box-shadow: 0 10px 20px rgba(198,167,94,0.3); z-index: 5; }
+
+  .thumbnail-grid { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .thumb { width: 80px; height: 80px; border-radius: 12px; background-size: cover; background-position: center; border: 2px solid transparent; cursor: pointer; opacity: 0.6; transition: all 0.2s; }
+  .thumb.active { border-color: #c6a75e; opacity: 1; transform: scale(1.05); }
+
+  /* Info Column */
+  .meta-top { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+  .trust-tag { color: #10b981; }
+  .stock-tag { color: #c6a75e; }
+
+  .product-title { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; margin-bottom: 16px; line-height: 1.1; }
+  .product-rating-row { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; margin-bottom: 30px; }
+  .stars { color: #f59e0b; }
+  .rating-val { color: #9a9387; }
+  .divider { width: 4px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+
+  .price-section { margin-bottom: 30px; }
+  .current-price { font-size: 3rem; font-weight: 900; color: #f5f2eb; transition: transform 0.2s ease; }
+  .old-price-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .old-price { color: #9a9387; text-decoration: line-through; font-size: 1.1rem; }
+  .save-tag { background: rgba(239,68,68,0.1); color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+
+  .short-desc { color: #9a9387; line-height: 1.6; margin-bottom: 40px; font-size: 1.05rem; }
+
+  /* Variant Selection */
+  .variant-selector { margin-bottom: 40px; }
+  .variant-selector label { display: block; font-weight: 700; margin-bottom: 16px; color: #9a9387; text-transform: uppercase; font-size: 0.75rem; }
+  .variant-options { display: flex; gap: 12px; flex-wrap: wrap; }
+  .variant-btn { 
+    background: rgba(255,255,255,0.03); 
+    border: 1.5px solid rgba(255,255,255,0.08); 
+    color: #f5f2eb; 
+    padding: 12px 24px; 
+    border-radius: 14px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: all 0.2s;
+  }
+  .variant-btn:hover { background: rgba(255,255,255,0.08); }
+  .variant-btn.active { border-color: #c6a75e; background: rgba(198,167,94,0.1); color: #c6a75e; }
+
+  /* CTAs */
+  .main-ctas { display: flex; gap: 16px; margin-bottom: 40px; flex-wrap: wrap; }
+  .btn-buy-now { flex: 1; min-width: 200px; background: #c6a75e; color: #1a1200; border: none; padding: 18px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; }
+  .btn-buy-now:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(198,167,94,0.2); }
+  .btn-add-cart { 
+    background: rgba(255,255,255,0.05); 
+    border: 1px solid rgba(255,255,255,0.1); 
+    color: #f5f2eb; 
+    width: 200px; 
+    border-radius: 16px; 
+    font-weight: 700; 
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  @media (max-width: 600px) { .btn-add-cart { width: 100%; } }
+  .btn-wishlist { 
+    width: 60px; 
+    background: rgba(255,255,255,0.05); 
+    border: 1px solid rgba(255,255,255,0.1); 
+    color: #f5f2eb; 
+    border-radius: 16px; 
+    cursor: pointer;
+    font-size: 1.4rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Trust & Urgency */
+  .trust-grid-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px; margin-bottom: 30px; }
+  .trust-mini-item { display: flex; gap: 12px; align-items: center; }
+  .tm-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.03); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .trust-mini-item strong { display: block; font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+  .trust-mini-item p { font-size: 0.75rem; color: #9a9387; margin: 0; }
+
+  .urgency-banner { background: rgba(198,167,94,0.05); border: 1px solid rgba(198,167,94,0.1); color: #c6a75e; padding: 14px; border-radius: 12px; font-size: 0.9rem; text-align: center; }
+
+  /* Tabs */
+  .product-details-tabs { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 60px; margin-bottom: 80px; }
+  .tabs-header { display: flex; gap: 40px; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); overflow-x: auto; scrollbar-width: none; }
+  .tabs-header::-webkit-scrollbar { display: none; }
+  .tab-btn { background: none; border: none; color: #9a9387; font-size: 1.1rem; font-weight: 700; padding-bottom: 16px; cursor: pointer; position: relative; white-space: nowrap; }
+  .tab-btn.active { color: #f5f2eb; }
+  .tab-btn.active::after { content:''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #c6a75e; }
+
+  .prose { max-width: 800px; color: #9a9387; line-height: 1.8; }
+
+  /* Related Section */
+  .related-section { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 60px; }
+  .h-sec { font-size: 1.5rem; font-weight: 900; margin-bottom: 30px; }
+  .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  @media (max-width: 900px) { .related-grid { grid-template-columns: repeat(2, 1fr); } }
+  .rel-card { text-decoration: none; color: inherit; background: #12141a; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; overflow: hidden; transition: all 0.2s; }
+  .rel-card:hover { border-color: #c6a75e; transform: translateY(-5px); }
+  .rel-img { height: 160px; background: rgba(255,255,255,0.03); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+  .rel-body { padding: 16px; }
+  .rel-body h4 { font-size: 1rem; margin-bottom: 8px; font-weight: 700; }
+  .rel-price { font-weight: 800; color: #c6a75e; }
+</style>
+
+<script>
+  import { cartItems, isCartOpen } from '../../store';
+
+  const productData = {
+    id: window.location.pathname.split('/').pop(),
+    productId: document.querySelector('.product-page')?.getAttribute('data-pid') || '',
+    title: document.querySelector('.product-title').textContent,
+    price: parseInt(document.getElementById('display-price').textContent.replace(/[^\d]/g, '')),
+  };
+
+  let selectedVariant = document.querySelector('.variant-btn.active')?.dataset.label || 'Standard';
+  let currentPrice = productData.price;
+
+  // --- Image Switcher ---
+  document.querySelectorAll('.thumb').forEach(thumb => {
+     thumb.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        const img = target.dataset.img;
+        const mainImg = document.getElementById('main-product-img');
+        if (mainImg) mainImg.style.backgroundImage = `url(${img})`;
+        
+        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+        target.classList.add('active');
+     });
+  });
+
+  // --- Handle Variant Click ---
+  document.querySelectorAll('.variant-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+      const target = e.currentTarget;
+      target.classList.add('active');
+      
+      const newPrice = parseInt(target.dataset.price);
+      currentPrice = newPrice;
+      selectedVariant = target.dataset.label;
+      
+      const priceDisplay = document.getElementById('display-price');
+      if (priceDisplay) {
+         priceDisplay.textContent = `৳${newPrice.toLocaleString()}`;
+         // Punch effect
+         priceDisplay.style.transform = 'scale(1.1)';
+         setTimeout(() => priceDisplay.style.transform = 'scale(1)', 200);
+      }
+    });
+  });
+
+  // --- Add to Cart ---
+  document.getElementById('add-cart-trigger')?.addEventListener('click', () => {
+    const item = {
+      id: `${productData.id}-${selectedVariant.replace(/\s+/g, '-').toLowerCase()}`,
+      productId: productData.productId,
+      productTitle: `${productData.title} (${selectedVariant})`,
+      price: currentPrice,
+      quantity: 1
+    };
+
+    const currentCart = cartItems.get();
+    const existingIndex = currentCart.findIndex(i => i.id === item.id);
+    
+    if (existingIndex > -1) {
+      const updatedCart = [...currentCart];
+      updatedCart[existingIndex] = { ...updatedCart[existingIndex], quantity: updatedCart[existingIndex].quantity + 1 };
+      cartItems.set(updatedCart);
+    } else {
+      cartItems.set([...currentCart, item]);
+    }
+    
+    isCartOpen.set(true);
+  });
+
+  // --- Buy Now ---
+  document.getElementById('buy-now-trigger')?.addEventListener('click', () => {
+    const item = {
+      id: `${productData.id}-${selectedVariant.replace(/\s+/g, '-').toLowerCase()}`,
+      productId: productData.productId,
+      productTitle: `${productData.title} (${selectedVariant})`,
+      price: currentPrice,
+      quantity: 1
+    };
+    cartItems.set([item]);
+    window.location.href = '/checkout';
+  });
+
+  // --- Rand View Count ---
+  const viewCount = document.getElementById('view-count');
+  if (viewCount) {
+     const base = parseInt(viewCount.textContent);
+     setInterval(() => {
+        const change = Math.floor(Math.random() * 3) - 1;
+        const current = parseInt(viewCount.textContent);
+        if (current > base - 5 && current < base + 15) {
+           viewCount.textContent = (current + change).toString();
+        }
+     }, 4000);
+  }
+</script>

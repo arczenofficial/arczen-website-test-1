@@ -1,0 +1,303 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    title: string;
+    products: CollectionEntry<'products'>[];
+}
+
+const { title, products } = Astro.props;
+
+// Take up to 4 products for the editorial layout
+const displayProducts = products.slice(0, 4);
+const heroProduct = displayProducts[0];
+const secondaryProducts = displayProducts.slice(1, 4);
+---
+
+<section class="py-16 relative overflow-hidden">
+    <!-- Background glow -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-accent/[0.02] blur-[100px] rounded-full"></div>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+        <!-- Section header -->
+        <div class="text-center mb-12 reveal">
+            <h2 class="text-3xl md:text-4xl font-serif text-cream mb-3">{title}</h2>
+            <div class="gold-line"></div>
+        </div>
+
+        <!-- Editorial asymmetric grid -->
+        <div class="editorial-grid reveal reveal-delay-2">
+            {/* Hero block — large */}
+            {heroProduct && (
+                <div class="editorial-hero">
+                    <div class="editorial-card editorial-card-hero group" data-card>
+                        <div class="editorial-card-shine"></div>
+                        <div class="editorial-img-wrap editorial-img-hero">
+                            <img src={heroProduct.data.image} alt={heroProduct.data.title} class="editorial-img" loading="lazy" />
+                            <div class="editorial-scrim"></div>
+                            
+                            <!-- Overlay content on hero card -->
+                            <div class="editorial-hero-overlay">
+                                <span class="editorial-badge">{heroProduct.data.accords}</span>
+                                <h3 class="editorial-hero-title">{heroProduct.data.title}</h3>
+                                <p class="editorial-hero-price">From ৳{heroProduct.data.price_6ml}</p>
+                                <a 
+                                    href={`#${heroProduct.slug}`}
+                                    class="view-details-btn editorial-cta"
+                                    data-product={JSON.stringify({...heroProduct.data, slug: heroProduct.slug})}
+                                >
+                                    Discover
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Secondary blocks — smaller */}
+            <div class="editorial-secondary">
+                {secondaryProducts.map((product, i) => (
+                    <div class={`editorial-card editorial-card-sm group reveal reveal-delay-${i + 2}`} data-card>
+                        <div class="editorial-card-shine"></div>
+                        <div class="editorial-img-wrap editorial-img-sm">
+                            <img src={product.data.image} alt={product.data.title} class="editorial-img" loading="lazy" />
+                            <div class="editorial-scrim"></div>
+                        </div>
+                        <div class="editorial-sm-info">
+                            <h3 class="editorial-sm-title">{product.data.title}</h3>
+                            <div class="editorial-sm-price">
+                                <span class="editorial-sm-from">From</span>
+                                <span>৳{product.data.price_6ml}</span>
+                            </div>
+                            <a 
+                                href={`#${product.slug}`}
+                                class="view-details-btn editorial-sm-btn"
+                                data-product={JSON.stringify({...product.data, slug: product.slug})}
+                            >
+                                <span>View Details</span>
+                                <span>→</span>
+                            </a>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ─── Grid layout ─── */
+    .editorial-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    @media (max-width: 768px) {
+        .editorial-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .editorial-secondary {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* ─── Cards ─── */
+    .editorial-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1a1714;
+        border: 1px solid rgba(198,167,94,0.06);
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+                    box-shadow 0.5s ease,
+                    border-color 0.3s ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .editorial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(198,167,94,0.1), 0 8px 25px rgba(0,0,0,0.4);
+            border-color: rgba(198,167,94,0.12);
+        }
+        .editorial-card:hover .editorial-card-shine { opacity: 1; }
+        .editorial-card:hover .editorial-img { transform: scale(1.06); }
+        .editorial-card:hover .editorial-scrim { opacity: 1; }
+        .editorial-card:hover .editorial-hero-overlay { opacity: 1; }
+    }
+
+    .editorial-card-shine {
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(198,167,94,0.06) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    /* ─── Images ─── */
+    .editorial-img-wrap {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .editorial-img-hero {
+        aspect-ratio: 3 / 4;
+    }
+
+    .editorial-img-sm {
+        aspect-ratio: 16 / 9;
+    }
+
+    @media (max-width: 768px) {
+        .editorial-img-hero { aspect-ratio: 1 / 1; }
+        .editorial-img-sm { aspect-ratio: 1 / 1; }
+    }
+
+    .editorial-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .editorial-scrim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 30%, rgba(13,11,8,0.7) 100%);
+        opacity: 0.5;
+        transition: opacity 0.4s ease;
+    }
+
+    /* ─── Hero card overlay ─── */
+    .editorial-hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 30px;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        opacity: 0.85;
+        transition: opacity 0.4s ease;
+    }
+
+    .editorial-badge {
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.9);
+        background: rgba(198,167,94,0.6);
+        backdrop-filter: blur(6px);
+        padding: 4px 10px;
+        border-radius: 4px;
+        width: fit-content;
+    }
+
+    .editorial-hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #f5f2eb;
+        line-height: 1.2;
+    }
+
+    .editorial-hero-price {
+        font-size: 1rem;
+        color: #c6a75e;
+        font-weight: 500;
+    }
+
+    .editorial-cta {
+        display: inline-block;
+        padding: 8px 20px;
+        border: 1px solid rgba(245,242,235,0.4);
+        color: #f5f2eb;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        width: fit-content;
+        transition: all 0.3s ease;
+        margin-top: 4px;
+    }
+
+    .editorial-cta:hover {
+        background: #c6a75e;
+        border-color: #c6a75e;
+        color: #1a1200;
+    }
+
+    /* ─── Small card info ─── */
+    .editorial-sm-info {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .editorial-sm-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f5f2eb;
+        line-height: 1.3;
+    }
+
+    .editorial-sm-price {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #c6a75e;
+    }
+
+    .editorial-sm-from {
+        font-size: 0.65rem;
+        font-weight: 400;
+        color: #9a9387;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .editorial-sm-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        margin-top: 4px;
+        background: linear-gradient(135deg, #c6a75e 0%, #e8c87a 50%, #c6a75e 100%);
+        background-size: 200% 200%;
+        background-position: left center;
+        color: #1a1200;
+        box-shadow: 0 3px 10px rgba(198,167,94,0.2);
+        transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .editorial-sm-btn:hover {
+            background-position: right center;
+            box-shadow: 0 5px 18px rgba(198,167,94,0.35);
+            transform: translateY(-1px);
+        }
+    }
+</style>

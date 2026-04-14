@@ -1,0 +1,439 @@
+---
+---
+<nav id="nav">
+  <div class="nav-top-bar">
+    <div class="nav-container">
+      <div class="top-bar-content">
+        <div class="top-bar-item">🇧🇩 Delivery to: <span class="highlight">Dhaka</span></div>
+        <div class="top-bar-item">Language: <span class="highlight">English</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-main">
+    <div class="nav-container main-grid">
+      <!-- 1. LOGO -->
+      <a href="/" class="nav-logo">
+        <div class="logo-mark">AZ</div>
+        <span class="logo-text">ArcZen</span>
+      </a>
+
+      <!-- 2. SEARCH BAR -->
+      <div class="search-wrapper">
+        <form class="search-form" id="searchForm">
+          <input type="text" id="searchInput" placeholder="Search for ChatGPT Plus, Valorant VP, or Netflix..." autocomplete="off">
+          <button type="submit" class="search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        </form>
+        <div id="searchPredictive" class="search-predictive hidden">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 3. ICONS -->
+      <div class="nav-actions">
+        <a href="/account/profile" class="action-item" id="navAccountLink" title="Account">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span class="action-label" id="accountLabel">Login</span>
+        </a>
+
+        <button class="action-item cart-trigger" id="cartBtn" title="Shopping Cart">
+          <div class="icon-badge-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="badge hidden" id="cartCount">0</span>
+          </div>
+          <span class="action-label">Cart</span>
+        </button>
+        
+        <button class="hamburger" id="ham" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bottom">
+    <div class="nav-container">
+      <ul class="nav-links">
+        <li class="dropdown-trigger">
+          <a href="/store" class="category-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            Shop Categories
+          </a>
+          <div class="categories-dropdown">
+            <div class="cat-grid">
+              <a href="/store?cat=gaming" class="cat-item">
+                <span class="cat-icon">🎮</span>
+                <span class="cat-name">Gaming Top-ups</span>
+              </a>
+              <a href="/store?cat=subscriptions" class="cat-item">
+                <span class="cat-icon">📺</span>
+                <span class="cat-name">Subscriptions</span>
+              </a>
+              <a href="/store?cat=services" class="cat-item">
+                <span class="cat-icon">🎨</span>
+                <span class="cat-name">Creative Services</span>
+              </a>
+              <a href="/store?cat=software" class="cat-item">
+                <span class="cat-icon">💻</span>
+                <span class="cat-name">Software & Keys</span>
+              </a>
+            </div>
+          </div>
+        </li>
+        <li><a href="/" class="nav-item">Flash Sales</a></li>
+        <li><a href="/services" class="nav-item">Services</a></li>
+        <li><a href="/store" class="nav-item">Full Store</a></li>
+        <li><a href="/portfolio" class="nav-item">Portfolio</a></li>
+        <li><a href="/about" class="nav-item">About Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-search">
+     <input type="text" placeholder="Search products..." id="mobSearchInput">
+  </div>
+  <a href="/" class="mob-link">🏠 Home</a>
+  <a href="/store" class="mob-link">🛒 Store</a>
+  <a href="/services" class="mob-link">🎨 Services</a>
+  <a href="/account/profile" class="mob-link" id="mobAccountLink">👤 My Account</a>
+</div>
+
+<style>
+  :root {
+    --nav-height-full: 140px;
+    --nav-height-compact: 72px;
+  }
+
+  #nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(8, 10, 12, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(198, 167, 94, 0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #nav.scrolled {
+    background: rgba(8, 10, 12, 0.95);
+    padding-top: 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Top Bar */
+  .nav-top-bar {
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 6px 0;
+    font-size: 0.75rem;
+    color: #9a9387;
+  }
+  .top-bar-content { display: flex; gap: 20px; justify-content: flex-end; }
+  .highlight { color: #c6a75e; font-weight: 600; }
+
+  /* Main Grid */
+  .nav-main { padding: 12px 0; }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #f5f2eb;
+    font-weight: 800;
+    font-size: 1.5rem;
+  }
+  .logo-mark {
+    background: linear-gradient(135deg, #c6a75e, #e8c87a);
+    color: #1a1200;
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  /* Search */
+  .search-wrapper { position: relative; max-width: 600px; width: 100%; margin: 0 auto; }
+  .search-form {
+    display: flex;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(198, 167, 94, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .search-form:focus-within { border-color: #c6a75e; background: rgba(255,255,255,0.08); }
+  .search-form input {
+    flex: 1;
+    background: none; border: none;
+    padding: 10px 16px;
+    color: #f5f2eb; font-size: 0.95rem;
+    outline: none;
+  }
+  .search-btn {
+    padding: 0 16px;
+    background: none; border: none;
+    color: var(--gold); cursor: pointer;
+    transition: all 0.3s;
+  }
+  .search-btn:hover { color: var(--gold-bright); transform: scale(1.1); }
+
+  /* Predictive Search */
+  .search-predictive {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: #1a1714;
+    border: 1px solid rgba(198, 167, 94, 0.2);
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    z-index: 100;
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .predictive-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 8px;
+    color: #f5f2eb; text-decoration: none;
+    transition: background 0.2s;
+  }
+  .predictive-item:hover { background: rgba(198,167,94,0.1); }
+  .pred-icon { font-size: 1.2rem; }
+  .pred-text { font-size: 0.9rem; font-weight: 600; }
+
+  /* Actions */
+  .nav-actions { display: flex; gap: 1.5rem; align-items: center; }
+  .action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #9a9387;
+    text-decoration: none;
+    background: none; border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .action-item:hover { color: #c6a75e; }
+  .action-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+
+  .icon-badge-wrapper { position: relative; }
+  .badge {
+    position: absolute;
+    top: -6px; right: -8px;
+    background: #c6a75e;
+    color: #1a1200;
+    font-size: 0.65rem;
+    font-weight: 800;
+    min-width: 16px; height: 16px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+  }
+
+  /* Bottom Nav */
+  .nav-bottom {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 8px 0;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0; padding: 0;
+    align-items: center;
+  }
+  .nav-item {
+    text-decoration: none;
+    color: #9a9387;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  .nav-item:hover { color: #f5f2eb; }
+
+  .category-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(198, 167, 94, 0.1);
+    color: #c6a75e;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .category-btn:hover {
+    background: rgba(198, 167, 94, 0.2);
+    color: #f5f2eb;
+  }
+
+  /* Dropdown Logic */
+  .dropdown-trigger { position: relative; }
+  .categories-dropdown {
+    position: absolute;
+    top: 100%; left: 0;
+    width: 240px;
+    background: #1a1714;
+    border: 1px solid rgba(198, 167, 94, 0.15);
+    border-radius: 12px;
+    padding: 10px;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-top: 8px;
+  }
+  .dropdown-trigger:hover .categories-dropdown { display: block; }
+  .cat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #f5f2eb;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .cat-item:hover { background: rgba(198,167,94,0.1); }
+  .cat-icon { font-size: 1.2rem; }
+
+  /* Mobile Tweaks */
+  .hamburger { display: none; }
+  
+  @media (max-width: 1024px) {
+    .main-grid { gap: 1rem; grid-template-columns: auto 1fr auto; }
+    .nav-bottom, .action-label, .logo-text { display: none; }
+    .hamburger { display: flex; flex-direction: column; gap: 5px; margin-left: 10px; background: none; border: none; cursor: pointer; }
+    .hamburger span { width: 24px; height: 2px; background: #c6a75e; border-radius: 2px; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+
+<script>
+  import { isCartOpen, cartItems } from '../store';
+  import { clientAuth, clientDb } from '../lib/firebase-client';
+  import { onAuthStateChanged } from 'firebase/auth';
+
+  // --- State Synchronization ---
+  cartItems.subscribe(items => {
+    const total = items.reduce((sum, item) => sum + item.quantity, 0);
+    const badge = document.getElementById('cartCount');
+    if (badge) {
+      badge.textContent = String(total);
+      badge.classList.toggle('hidden', total === 0);
+    }
+  });
+
+
+  // --- Auth & Account ---
+  let unsubscribeProfile: any = null;
+  onAuthStateChanged(clientAuth, async (user) => {
+    const label = document.getElementById('accountLabel');
+    const link = document.getElementById('navAccountLink') as HTMLAnchorElement;
+    
+    if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; }
+
+    if (user) {
+      // Immediate fallback from Auth
+      let name = user.displayName || user.email?.split('@')[0] || 'User';
+      if (label) label.textContent = name;
+      if (link) link.href = '/account/profile';
+
+      // Reactive update from Firestore
+      const { doc, onSnapshot } = await import('firebase/firestore');
+      unsubscribeProfile = onSnapshot(doc(clientDb, 'customers', user.uid), (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          let reactiveName = name;
+          if (data.firstName) reactiveName = data.firstName;
+          else if (data.name) reactiveName = data.name.split(' ')[0];
+          
+          if (label) label.textContent = reactiveName;
+        }
+      }, (err) => {
+        console.warn('Profile snapshot error:', err);
+      });
+    } else {
+      if (label) label.textContent = 'Login';
+      if (link) link.href = '/account/login';
+    }
+  });
+
+  // --- Search Redirection ---
+  const searchForm = document.getElementById('searchForm') as HTMLFormElement;
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+
+  searchForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if (query) {
+      window.location.href = `/store?q=${encodeURIComponent(query)}`;
+    }
+  });
+
+  const mobSearchInput = document.getElementById('mobSearchInput') as HTMLInputElement;
+  mobSearchInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const query = mobSearchInput.value.trim();
+      if (query) {
+        window.location.href = `/store?q=${encodeURIComponent(query)}`;
+      }
+    }
+  });
+
+  // --- Search predictive placeholder ---
+  const predictiveArea = document.getElementById('searchPredictive');
+
+  searchInput?.addEventListener('input', (e) => {
+    const val = (e.target as HTMLInputElement).value;
+    if (val.length > 2) {
+      // Mock predictive - could be improved with real data
+      predictiveArea?.classList.remove('hidden');
+    } else {
+      predictiveArea?.classList.add('hidden');
+    }
+  });
+
+  // --- Mobile Menu Toggle ---
+  const ham = document.getElementById('ham');
+  const mobMenu = document.getElementById('mob-menu');
+  let menuOpen = false;
+
+  ham?.addEventListener('click', () => {
+    menuOpen = !menuOpen;
+    mobMenu?.classList.toggle('open', menuOpen);
+  });
+
+  // --- Scroll Effects ---
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      nav?.classList.add('scrolled');
+    } else {
+      nav?.classList.remove('scrolled');
+    }
+  });
+
+  document.getElementById('cartBtn')?.addEventListener('click', () => isCartOpen.set(true));
+</script>
+

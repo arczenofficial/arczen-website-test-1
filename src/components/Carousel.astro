@@ -1,0 +1,398 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    title: string;
+    products: CollectionEntry<'products'>[];
+    variant?: 'default' | 'sale';
+}
+
+const { title, products, variant = 'default' } = Astro.props;
+
+// Helper: calc save %
+function savePercent(product: CollectionEntry<'products'>) {
+    const orig = product.data.price_6ml;
+    const sale = product.data.sale_price_6ml;
+    if (!sale || sale >= orig) return 0;
+    return Math.round(((orig - sale) / orig) * 100);
+}
+---
+
+<section class="py-16 relative overflow-hidden">
+    <!-- Section background glow -->
+    <div class="absolute inset-0 bg-gradient-section pointer-events-none"></div>
+    
+    <div class="container mx-auto px-6 relative z-10">
+        <!-- Section header -->
+        <div class="text-center mb-10 reveal">
+            <h2 class="text-3xl md:text-4xl font-serif text-cream mb-3">{title}</h2>
+            <div class="gold-line"></div>
+        </div>
+
+        <!-- Horizontal scroll carousel -->
+        <div class="carousel-wrapper reveal reveal-delay-2">
+            <div class="carousel-track" data-carousel>
+                {products.map((product) => {
+                    const isSale = variant === 'sale' && product.data.sale_price_6ml;
+                    const pct = isSale ? savePercent(product) : 0;
+                    return (
+                    <div class="carousel-slide">
+                        <div class={`carousel-card group ${isSale ? 'carousel-card--sale' : ''}`} data-card>
+                            {/* Card shine */}
+                            <div class="carousel-card-shine"></div>
+                            
+                            {/* Image */}
+                            <div class="carousel-img-wrap">
+                                <img src={product.data.image} alt={product.data.title} class="carousel-img" loading="lazy" />
+                                <div class="carousel-img-scrim"></div>
+                                {/* Sale badge */}
+                                {isSale && pct > 0 && (
+                                    <div class="carousel-sale-badge">SAVE {pct}%</div>
+                                )}
+                            </div>
+                            
+                            {/* Info */}
+                            <div class="carousel-info">
+                                <h3 class="carousel-title">{product.data.title}</h3>
+                                <div class="carousel-price">
+                                    {isSale ? (
+                                        <>
+                                            <span class="carousel-price-original">৳{product.data.price_6ml}</span>
+                                            <span class="carousel-price-val carousel-price-sale">৳{product.data.sale_price_6ml}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span class="carousel-price-from">From</span>
+                                            <span class="carousel-price-val">৳{product.data.price_6ml}</span>
+                                        </>
+                                    )}
+                                </div>
+                                <a 
+                                    href={`#${product.slug}`} 
+                                    class="view-details-btn carousel-btn"
+                                    data-product={JSON.stringify({...product.data, slug: product.slug})}
+                                >
+                                    <span>View Details</span>
+                                    <span class="carousel-btn-arrow">→</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    );
+                })}
+            </div>
+
+            <!-- Scroll indicators -->
+            <button class="carousel-arrow carousel-arrow-left" data-carousel-prev aria-label="Previous">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="carousel-arrow carousel-arrow-right" data-carousel-next aria-label="Next">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ─── Carousel wrapper ─── */
+    .carousel-wrapper {
+        position: relative;
+    }
+
+    .carousel-track {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        padding: 10px 0 20px;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .carousel-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .carousel-slide {
+        flex: 0 0 calc(25% - 15px);
+        scroll-snap-align: start;
+        min-width: 240px;
+    }
+
+    @media (max-width: 1024px) {
+        .carousel-slide { flex: 0 0 calc(33.333% - 14px); }
+    }
+    @media (max-width: 768px) {
+        .carousel-slide { flex: 0 0 calc(50% - 10px); }
+    }
+    @media (max-width: 480px) {
+        .carousel-slide { flex: 0 0 80%; min-width: 260px; }
+    }
+
+    /* ─── Card ─── */
+    .carousel-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1a1714;
+        border: 1px solid rgba(198,167,94,0.06);
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+                    box-shadow 0.5s ease,
+                    border-color 0.3s ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .carousel-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(198,167,94,0.12), 0 8px 20px rgba(0,0,0,0.4);
+            border-color: rgba(198,167,94,0.15);
+        }
+        .carousel-card:hover .carousel-card-shine { opacity: 1; }
+        .carousel-card:hover .carousel-img { transform: scale(1.08); }
+        .carousel-card:hover .carousel-img-scrim { opacity: 1; }
+    }
+
+    .carousel-card-shine {
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(198,167,94,0.08) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* ─── Image ─── */
+    .carousel-img-wrap {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+    }
+
+    .carousel-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .carousel-img-scrim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 40%, rgba(13,11,8,0.6) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    /* ─── Info ─── */
+    .carousel-info {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .carousel-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #f5f2eb;
+        line-height: 1.3;
+    }
+
+    .carousel-price {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+        color: #c6a75e;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .carousel-price-from {
+        font-size: 0.68rem;
+        font-weight: 400;
+        color: #9a9387;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* ─── Sale variant ─── */
+    .carousel-card--sale {
+        border-color: rgba(192,64,64,0.15);
+    }
+
+    .carousel-sale-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 4;
+        padding: 5px 12px;
+        background: linear-gradient(135deg, #c04040, #d35050);
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-radius: 6px;
+        box-shadow: 0 3px 10px rgba(192,64,64,0.4);
+    }
+
+    .carousel-price-original {
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: #7a756d;
+        text-decoration: line-through;
+        text-decoration-color: rgba(200,80,80,0.6);
+    }
+
+    .carousel-price-sale {
+        color: #e8c87a;
+        font-weight: 700;
+    }
+
+    /* ─── Button ─── */
+    .carousel-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        margin-top: 4px;
+        background: linear-gradient(135deg, #c6a75e 0%, #e8c87a 50%, #c6a75e 100%);
+        background-size: 200% 200%;
+        background-position: left center;
+        color: #1a1200;
+        box-shadow: 0 3px 12px rgba(198,167,94,0.25);
+        transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .carousel-btn:hover {
+            background-position: right center;
+            box-shadow: 0 6px 20px rgba(198,167,94,0.4);
+            transform: translateY(-1px);
+        }
+        .carousel-btn:hover .carousel-btn-arrow {
+            transform: translateX(4px);
+        }
+    }
+
+    .carousel-btn-arrow {
+        transition: transform 0.3s ease;
+    }
+
+    /* ─── Navigation arrows ─── */
+    .carousel-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid rgba(198,167,94,0.2);
+        background: rgba(13,11,8,0.8);
+        backdrop-filter: blur(8px);
+        color: #c6a75e;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-arrow:hover {
+        background: rgba(198,167,94,0.15);
+        border-color: rgba(198,167,94,0.4);
+        box-shadow: 0 0 20px rgba(198,167,94,0.15);
+    }
+
+    .carousel-arrow-left { left: -16px; }
+    .carousel-arrow-right { right: -16px; }
+
+    @media (max-width: 768px) {
+        .carousel-arrow-left { left: 4px; }
+        .carousel-arrow-right { right: 4px; }
+    }
+</style>
+
+<script>
+    // Carousel scroll + auto-scroll (step-based, seamless loop)
+    document.querySelectorAll('[data-carousel]').forEach(track => {
+        const wrapper = track.closest('.carousel-wrapper');
+        if (!wrapper) return;
+
+        const prevBtn = wrapper.querySelector('[data-carousel-prev]');
+        const nextBtn = wrapper.querySelector('[data-carousel-next]');
+
+        // Get width of one slide (first child) for step-based scrolling
+        function getSlideWidth(): number {
+            const firstSlide = track.querySelector('.carousel-slide') as HTMLElement;
+            if (!firstSlide) return 280;
+            return firstSlide.offsetWidth + 20; // width + gap
+        }
+
+        prevBtn?.addEventListener('click', () => {
+            track.scrollBy({ left: -getSlideWidth(), behavior: 'smooth' });
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            track.scrollBy({ left: getSlideWidth(), behavior: 'smooth' });
+        });
+
+        // ─── Seamless auto-scroll ───
+        let autoScrollTimer: ReturnType<typeof setTimeout>;
+        let isPaused = false;
+
+        function autoScrollStep() {
+            if (isPaused) {
+                autoScrollTimer = setTimeout(autoScrollStep, 3500);
+                return;
+            }
+
+            const maxScroll = track.scrollWidth - track.clientWidth;
+
+            if (track.scrollLeft >= maxScroll - 5) {
+                // At the end → instantly reset to start (no visible jump)
+                // First disable smooth scrolling, reset, then re-enable
+                track.style.scrollBehavior = 'auto';
+                track.scrollLeft = 0;
+
+                // Re-enable smooth scrolling after a frame
+                requestAnimationFrame(() => {
+                    track.style.scrollBehavior = 'smooth';
+                });
+
+                // Wait a bit longer before next step to feel natural
+                autoScrollTimer = setTimeout(autoScrollStep, 4000);
+            } else {
+                // Smooth scroll by one card width
+                track.scrollBy({ left: getSlideWidth(), behavior: 'smooth' });
+
+                // Next step after 3.5s (includes ~750ms scroll transition)
+                autoScrollTimer = setTimeout(autoScrollStep, 3500);
+            }
+        }
+
+        // Pause on hover / touch
+        track.addEventListener('mouseenter', () => { isPaused = true; });
+        track.addEventListener('mouseleave', () => { isPaused = false; });
+        track.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
+        track.addEventListener('touchend', () => {
+            // Resume after a short delay so manual scroll finishes
+            setTimeout(() => { isPaused = false; }, 2000);
+        });
+
+        // Start auto-scroll after initial delay
+        setTimeout(autoScrollStep, 3500);
+    });
+</script>

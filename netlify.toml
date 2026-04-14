@@ -1,0 +1,42 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Netlify Identity + Git Gateway for Decap CMS
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+# SPA fallback for account pages (client-side routing)
+[[redirects]]
+  from = "/account/*"
+  to = "/account/:splat.html"
+  status = 200
+
+# --- 🛰️ SINGLE DOMAIN PROXY (Zero-Trust Arch) ---
+# Maps your admin site into a subfolder of this domain.
+
+# 1. Main Dashboard Access
+[[redirects]]
+  from = "/arc-management-portal/*" # Your CHOSEN secret path
+  to = "https://arczen-admin-v2.netlify.app/cuteadmin/:splat" # REPLACE with your Admin Site URL
+  status = 200 # PROXY (URL remains arczen.store/arc-management-portal)
+  force = true
+
+# 2. Admin Panel Specific Assets
+[[redirects]]
+  from = "/assets/css/cuteadmin.css"
+  to = "https://arczen-admin-v2.netlify.app/assets/css/cuteadmin.css"
+  status = 200
+
+[[redirects]]
+  from = "/assets/js/cuteadmin/*"
+  to = "https://arczen-admin-v2.netlify.app/assets/js/cuteadmin/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/assets/images/cuteadmin/*"
+  to = "https://arczen-admin-v2.netlify.app/assets/images/cuteadmin/:splat"
+  status = 200

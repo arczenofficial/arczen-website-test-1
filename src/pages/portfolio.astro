@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+---
+
+<Layout title="Portfolio | ArcZen">
+  <Header />
+
+  <div class="page active" id="page-portfolio">
+    <div class="container" style="padding-top:130px;padding-bottom:80px;">
+      <div class="sec-header reveal">
+        <div class="sec-tag">Portfolio</div>
+        <h1 style="font-size:clamp(2rem,4.5vw,3.5rem);font-family:var(--font-d);font-weight:900;margin-bottom:14px">Our Work Speaks.</h1>
+        <p class="sec-desc">Early projects — real clients, real results.</p>
+      </div>
+      <div class="port-page-grid">
+        <div class="port-page-card" style="grid-row:span 2">
+          <div class="port-page-thumb" style="height:260px;background:linear-gradient(135deg,#e0f2fe,#93c5fd);font-size:4rem">🌐</div>
+          <div class="port-page-info">
+            <div class="port-type">Web Design — E-commerce</div>
+            <div class="port-title" style="font-size:1rem;font-weight:800;margin-bottom:8px">TechStart BD — SaaS Platform</div>
+            <div class="port-sub">Technology · 2024 · Converted 11.8% of paid traffic</div>
+            <p style="font-size:0.82rem;color:var(--text-3);margin-top:10px;line-height:1.65">Full SaaS landing page with pricing, dashboard preview, and integrated onboarding flow.</p>
+          </div>
+        </div>
+        <div class="port-page-card"><div class="port-page-thumb" style="background:linear-gradient(135deg,#ede9fe,#c4b5fd)">🎨</div><div class="port-page-info"><div class="port-type">Branding</div><div class="port-title" style="font-weight:800">Sabrina Boutique — Full Rebrand</div><div class="port-sub">Fashion · +40% Instagram engagement</div></div></div>
+        <div class="port-page-card"><div class="port-page-thumb" style="background:linear-gradient(135deg,#dcfce7,#86efac)">🎬</div><div class="port-page-info"><div class="port-type">Video Editing</div><div class="port-title" style="font-weight:800">FreelanceAce YouTube Series</div><div class="port-sub">Content Creator · 68% watch retention</div></div></div>
+        <div class="port-page-card"><div class="port-page-thumb" style="background:linear-gradient(135deg,#fef9c3,#fde68a)">🛒</div><div class="port-page-info"><div class="port-type">E-commerce</div><div class="port-title" style="font-weight:800">DigiGrow — Online Store</div><div class="port-sub">Retail · 3× revenue in 60 days</div></div></div>
+        <div class="port-page-card"><div class="port-page-thumb" style="background:linear-gradient(135deg,#e0f2fe,#7dd3fc)">📱</div><div class="port-page-info"><div class="port-type">Social Media Design</div><div class="port-title" style="font-weight:800">StartupDhaka — Monthly Kit</div><div class="port-sub">Startup · 16-post template system</div></div></div>
+        <div class="port-page-card"><div class="port-page-thumb" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">🎯</div><div class="port-page-info"><div class="port-type">Landing Page</div><div class="port-title" style="font-weight:800">Priya Sharma — Consulting</div><div class="port-sub">Services · 9.4% conversion rate</div></div></div>
+      </div>
+      <div style="text-align:center;margin-bottom:80px">
+        <a href="/contact" class="btn btn-primary btn-lg" style="text-decoration:none;">Start Your Project →</a>
+      </div>
+    </div>
+  </div>
+
+  <CartDrawer />
+  <Footer />
+</Layout>

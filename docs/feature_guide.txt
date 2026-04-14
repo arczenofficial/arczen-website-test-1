@@ -1,0 +1,70 @@
+# ARCZEN UNIFIED PLATFORM — COMPLETE FEATURE GUIDE
+
+This document details the features of the consolidated ArcZen platform, including the Public Client Account and the internal CuteAdmin Panel.
+
+---
+
+## 🏬 PUBLIC CLIENT ACCOUNT (Custoemr Area)
+Located at: https://arczen.store/account/
+
+### 1. Secure Authentication
+*   **Registration**: Streamlined account creation for new customers.
+*   **Google & Email Login**: Support for multiple login methods for ease of access.
+*   **Password Recovery**: Automated system for resetting forgotten passwords via email.
+
+### 2. Customer Profile
+*   **Personal Info**: Management of full name, email address, and avatar.
+*   **Preferences**: Storage of user-specific site settings and interaction history.
+
+### 3. Order & Digital Goods Management
+*   **Transaction History**: A comprehensive log of all past purchases.
+*   **Digital Delivery System**: Instant access to purchased gaming items, subscriptions, and digital credentials.
+*   **Order Tracking**: Real-time status updates for ongoing and fulfilled orders.
+
+---
+
+## 🦄 CUTEADMIN PANEL (Internal Management System)
+Located at: http://localhost:4321/cuteadmin/ (Internal Unified Path)
+
+### 1. Unified Dashboard Center
+*   **KPI Visualization**: High-level metrics for Total Tasks, Completion Rates, and Overdue Items.
+*   **Live Activity Feed**: Real-time stream of system-wide actions and updates.
+*   **Recent Task List**: Quick-access view of local and assigned work.
+
+### 2. Task & Workflow Management
+*   **Advanced Task Engine**: Create, update, and prioritize tasks with status tracking.
+*   **Team Assignment**: Direct assignment of projects to specific team members.
+*   **Resource Management**: Linking tasks to external documents and project files.
+
+### 3. Attendance & Performance Tracker
+*   **Daily Log System**: Automated tracking of entry and exit times for employees.
+*   **Performance Metrics**: Calculation of total productive hours and consistency over time.
+
+### 4. Points & Rewards (Gamification)
+*   **Achievement System**: Assigning reward points for completed projects and meeting deadlines.
+*   **Leaderboard**: Tracking top-performing employees within the team.
+
+### 5. Team & Authorization Suite
+*   **Zero-Trust Whitelist**: Only authorized emails can access the admin panel.
+*   **Role-Based Access (RBAC)**: Fine-grained permissions for Admin, Moderator, and Employee.
+*   **Masquerade Mode**: Admin capability to view the panel from other user roles for support and testing.
+
+### 6. Store Operations
+*   **Product Manager**: Inventory management for digital goods, including pricing and stock levels.
+*   **Order Fulfillment Center**: Centralized area for managing customer purchases and ensuring delivery.
+*   **Customer CRM**: Comprehensive database of all store customers and their lifetime engagement.
+*   **Sales Analytics**: Graphical representation of store performance and sales trends.
+
+### 7. Internal Management System (IMS)
+*   **IMS Client CRM**: B2B database for agency-level creative services.
+*   **IMS Project Tracking**: Lifecycle management for high-value client projects.
+*   **Professional Invoicing**: Tool for generating and managing professional billing for clients.
+
+### 8. System Governance & Security
+*   **Activity Log / System Audit**: Complete visibility into sensitive platform actions, security events, and data changes.
+*   **Touch of the Founder**: Exclusive, top-level control panel for the platform owner.
+*   **Company Settings**: Global configuration for branding, system defaults, and platform parameters.
+*   **Content CMS Link**: Integrated access point for managing site-wide markdown content (Products, Portfolio, Services).
+
+---
+© 2026 ArcZen Digital Studio.

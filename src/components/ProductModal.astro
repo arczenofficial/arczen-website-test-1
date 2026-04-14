@@ -1,0 +1,306 @@
+---
+// ProductModal.astro
+---
+
+<div id="product-modal" class="modal-root">
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+
+    <div id="modal-panel" class="modal-panel">
+        <button id="modal-close" class="modal-close" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+
+        <!-- Dynamic Content -->
+        <div class="modal-grid">
+            <!-- Left: Image -->
+            <div class="modal-image-col">
+                <img id="modal-img" src="/images/placeholder.png" alt="Product" />
+            </div>
+
+            <!-- Right: Details -->
+            <div class="modal-details-col" id="modal-content-area">
+                <p id="modal-category" class="modal-accords" style="margin-bottom: 4px;"></p>
+                <h2 id="modal-title" class="modal-title">Product Name</h2>
+                
+                <div id="modal-delivery-badge" style="margin-top: 12px; margin-bottom: 8px;"></div>
+                
+                <div class="modal-price-wrap" style="margin-top: 16px;">
+                    <h3 id="modal-price" class="modal-price-num">৳0</h3>
+                </div>
+
+                <!-- Variants selection -->
+                <div id="modal-variants" style="margin-top: 24px; display: none;">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; color: #a1a1aa; margin-bottom: 8px; letter-spacing: 0.05em;">Select Option</h4>
+                    <div class="variant-picker" id="variants-container"></div>
+                </div>
+
+                <!-- Description -->
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
+                    <p id="modal-desc" class="modal-desc" style="color: #a1a1aa; line-height: 1.6; font-size: 0.95rem;"></p>
+                    <p id="modal-delivery-info" style="color: #71717a; font-size: 0.85rem; margin-top: 12px; font-style: italic;"></p>
+                </div>
+
+                <!-- Call to Actions -->
+                <div class="modal-cta-grid" style="margin-top: auto; padding-top: 32px;">
+                    <button id="modal-add-cart" class="btn-buy secondary">
+                        <span>Add To Cart</span>
+                        <i class="material-icons-round" style="font-size: 1.2rem;">add_shopping_cart</i>
+                    </button>
+                    <button id="modal-buy-now" class="btn-buy">
+                        <span>Buy Now</span>
+                        <i class="material-icons-round" style="font-size: 1.2rem;">flash_on</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-root {
+        position: fixed; inset: 0; z-index: 10000;
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .modal-root.is-open {
+        opacity: 1; pointer-events: auto;
+    }
+    
+    .modal-backdrop {
+        position: absolute; inset: 0;
+        background: rgba(8, 8, 8, 0.85); backdrop-filter: blur(8px);
+    }
+    
+    .modal-panel {
+        position: relative; z-index: 1;
+        width: 100%; max-width: 900px;
+        background: #141414;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px; overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        
+        transform: translateY(20px) scale(0.98);
+        transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .modal-root.is-open .modal-panel {
+        transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+        position: absolute; top: 16px; right: 16px; z-index: 10;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,0.1); border: none; color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.2s; backdrop-filter: blur(4px);
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+
+    .modal-grid {
+        display: grid; grid-template-columns: 1fr 1fr;
+        min-height: 400px; max-height: 85vh;
+    }
+
+    .modal-image-col {
+        background: #0a0a0a; display: flex; align-items: center; justify-content: center;
+        overflow: hidden; padding: 2rem; border-right: 1px solid rgba(255,255,255,0.05);
+    }
+    .modal-image-col img { width: 100%; height: auto; object-fit: contain; }
+
+    .modal-details-col {
+        padding: 32px; display: flex; flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .modal-title { margin: 0; font-size: 2rem; color: #fff; line-height: 1.1; }
+    .modal-accords { color: #f59e0b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+    .modal-price-num { margin: 0; font-size: 2.2rem; font-weight: 600; color: #fff; }
+
+    .variant-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+    .variant-btn {
+        padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+        background: transparent; color: #a1a1aa; cursor: pointer; transition: all 0.2s ease;
+    }
+    .variant-btn:hover { border-color: rgba(255,255,255,0.4); color: white; }
+    .variant-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
+
+    .btn-buy {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        padding: 16px; border-radius: 12px; border: none; cursor: pointer;
+        font-size: 1rem; font-weight: 600; background: #fff; color: #000;
+        transition: all 0.2s; width: 100%;
+    }
+    .btn-buy:hover { background: #e5e5e5; transform: translateY(-2px); }
+    .btn-buy.secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; }
+    .btn-buy.secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
+
+    .modal-cta-grid { display: flex; flex-direction: column; gap: 12px; }
+
+    @media (max-width: 768px) {
+        .modal-grid { grid-template-columns: 1fr; display: flex; flex-direction: column; }
+        .modal-image-col { min-height: 250px; padding: 1rem; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .modal-details-col { padding: 24px 20px; }
+        .modal-title { font-size: 1.5rem; }
+    }
+</style>
+
+<script>
+    import { isProductModalOpen, activeProduct, closeProductModal, addToCart } from '../store';
+
+    let currentProduct: any = null;
+    let selectedVariant: any = null;
+
+    const modal = document.getElementById('product-modal');
+    const closeBtn = document.getElementById('modal-close');
+    const backdrop = document.getElementById('modal-backdrop');
+    
+    // UI Elements
+    const elImg = document.getElementById('modal-img') as HTMLImageElement;
+    const elTitle = document.getElementById('modal-title');
+    const elPrice = document.getElementById('modal-price');
+    const elCategory = document.getElementById('modal-category');
+    const elDeliveryBadge = document.getElementById('modal-delivery-badge');
+    const elDeliveryInfo = document.getElementById('modal-delivery-info');
+    const elDesc = document.getElementById('modal-desc');
+    const elVariants = document.getElementById('modal-variants');
+    const elVariantsContainer = document.getElementById('variants-container');
+    
+    // Buttons
+    const btnBuy = document.getElementById('modal-buy-now');
+    const btnAdd = document.getElementById('modal-add-cart');
+
+    // Subscribe to store state
+    isProductModalOpen.subscribe(isOpen => {
+        if (!modal) return;
+        if (isOpen) {
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        } else {
+            modal.classList.remove('is-open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    activeProduct.subscribe(product => {
+        if (!product || !elTitle) return;
+        currentProduct = product;
+        
+        // Basic mapping
+        if (elImg) elImg.src = product.image || '/images/placeholder.png';
+        if (elTitle) elTitle.textContent = product.title;
+        if (elCategory) elCategory.textContent = product.category ? product.category.toUpperCase().replace('-', ' ') : 'STORE';
+        if (elDesc) elDesc.innerHTML = product.description ? (product.description.replace(/\n/g, '<br>')) : (product.short_description || '');
+        
+        // Delivery logic
+        if (elDeliveryBadge) {
+            if (product.delivery_type === 'instant') {
+                elDeliveryBadge.innerHTML = '<span style="color: #10b981; background: rgba(16,185,129,0.1); padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">⚡ INSTANT DELIVERY</span>';
+            } else {
+                elDeliveryBadge.innerHTML = '<span style="color: #f59e0b; background: rgba(245,158,11,0.1); padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">🕐 EMAIL PROCESSING</span>';
+            }
+        }
+        if (elDeliveryInfo) elDeliveryInfo.textContent = product.delivery_info || 'Delivered shortly after checkout.';
+
+        // Variants Logic
+        if (elVariantsContainer && elVariants) {
+            elVariantsContainer.innerHTML = '';
+            if (product.variants && product.variants.length > 0) {
+                elVariants.style.display = 'block';
+                selectedVariant = product.variants[0]; // default to first
+                
+                product.variants.forEach((v: any, idx: number) => {
+                    const btn = document.createElement('button');
+                    btn.className = `variant-btn ${idx === 0 ? 'active' : ''}`;
+                    btn.textContent = v.label;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedVariant = v;
+                        updatePrice();
+                    };
+                    elVariantsContainer.appendChild(btn);
+                });
+            } else {
+                elVariants.style.display = 'none';
+                selectedVariant = null;
+            }
+        }
+
+        updatePrice();
+    });
+
+    function updatePrice() {
+        if (!currentProduct || !elPrice) return;
+        
+        let price = currentProduct.price;
+        let originalPrice = currentProduct.price;
+        let sale = currentProduct.on_sale;
+
+        if (selectedVariant) {
+            price = selectedVariant.sale_price || selectedVariant.price;
+            originalPrice = selectedVariant.price;
+            sale = !!selectedVariant.sale_price;
+        } else if (currentProduct.on_sale && currentProduct.sale_price) {
+            price = currentProduct.sale_price;
+        }
+
+        if (sale && originalPrice > price) {
+            elPrice.innerHTML = `<span style="text-decoration: line-through; color: #52525b; font-size: 1.5rem; font-weight: normal; margin-right: 12px;">৳${originalPrice}</span> ৳${price}`;
+        } else {
+            elPrice.textContent = `৳${price}`;
+        }
+    }
+
+    // Handlers
+    function handleAddToCart() {
+        if (!currentProduct) return;
+        
+        const price = selectedVariant 
+            ? (selectedVariant.sale_price || selectedVariant.price)
+            : (currentProduct.sale_price && currentProduct.on_sale ? currentProduct.sale_price : currentProduct.price);
+
+        // Resolve a guaranteed non-empty productId — must match the Firestore document ID
+        const productId = (
+            currentProduct.productId ||
+            currentProduct.id ||
+            currentProduct.slug ||
+            (currentProduct.title ? currentProduct.title.toLowerCase().replace(/\s+/g, '-') : null)
+        );
+
+        if (!productId) {
+            console.error('Cannot add to cart: product has no valid ID', currentProduct);
+            alert('Unable to add this product. Please refresh the page and try again.');
+            return;
+        }
+
+        addToCart({
+            productId,
+            productTitle: currentProduct.title,
+            productImage: currentProduct.image || '/images/placeholder.png',
+            variantLabel: selectedVariant ? selectedVariant.label : null,
+            price: price,
+            quantity: 1
+        });
+        
+        closeProductModal();
+    }
+
+    function handleBuyNow() {
+        handleAddToCart();
+        window.location.href = '/checkout';
+    }
+
+    // Attach Handlers
+    closeBtn?.addEventListener('click', closeProductModal);
+    backdrop?.addEventListener('click', closeProductModal);
+    btnAdd?.addEventListener('click', handleAddToCart);
+    btnBuy?.addEventListener('click', handleBuyNow);
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeProductModal();
+    });
+</script>

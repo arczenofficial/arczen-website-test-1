@@ -1,0 +1,91 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images/products"
+public_folder: "/images/products"
+
+publish_mode: editorial_workflow
+
+site_url: https://arczen.store
+display_url: https://arczen.store
+
+collections:
+  - name: "products"
+    label: "Products"
+    label_singular: "Product"
+    folder: "src/content/products"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    identifier_field: title
+    summary: "{{title}} — {{category}} — ৳{{price}}"
+    sortable_fields: ["display_order", "title", "category", "price"]
+    view_filters:
+      - { label: "Featured", field: featured, pattern: true }
+      - { label: "On Sale", field: on_sale, pattern: true }
+      - { label: "Subscriptions", field: category, pattern: "subscription" }
+      - { label: "Game Top-ups", field: category, pattern: "game-topup" }
+      - { label: "Software", field: category, pattern: "software" }
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Product Image", name: "image", widget: "image", required: false }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "📦 Subscription", value: "subscription" }
+          - { label: "🎮 Game Top-up", value: "game-topup" }
+          - { label: "💻 Software", value: "software" }
+          - { label: "⚙️ Service", value: "service" }
+          - { label: "✨ Other", value: "other" }
+      - { label: "Short Description", name: "short_description", widget: "string", required: false }
+      - { label: "Full Description", name: "description", widget: "markdown", required: false }
+      - { label: "Base Price (৳)", name: "price", widget: "number", value_type: "int" }
+      - label: "Variants"
+        name: "variants"
+        widget: "list"
+        required: false
+        hint: "Pricing tiers: 1 Month, 3 Months, 1 Year, 100 UC, etc."
+        fields:
+          - { label: "Label", name: "label", widget: "string" }
+          - { label: "Price (৳)", name: "price", widget: "number", value_type: "int" }
+          - { label: "Sale Price (৳)", name: "sale_price", widget: "number", value_type: "int", required: false }
+      - { label: "On Sale?", name: "on_sale", widget: "boolean", default: false }
+      - { label: "Sale Price (৳)", name: "sale_price", widget: "number", value_type: "int", required: false }
+      - { label: "Offer Label", name: "offer_label", widget: "string", required: false, hint: "e.g. ⚡ Flash Sale" }
+      - { label: "Offer Expires", name: "offer_expires", widget: "datetime", required: false }
+      - { label: "Badge", name: "badge", widget: "string", required: false, hint: "e.g. 🔥 Hot Deal" }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false }
+      - { label: "New Arrival", name: "new_arrival", widget: "boolean", default: false }
+      - { label: "Bestseller", name: "bestseller", widget: "boolean", default: false }
+      - label: "Delivery Type"
+        name: "delivery_type"
+        widget: "select"
+        options:
+          - { label: "⚡ Instant", value: "instant" }
+          - { label: "🕐 Manual", value: "manual" }
+        default: "manual"
+      - { label: "Delivery Info", name: "delivery_info", widget: "string", required: false, hint: "e.g. Delivered within 2–6 hours" }
+      - { label: "In Stock", name: "in_stock", widget: "boolean", default: true }
+      - { label: "Display Order", name: "display_order", widget: "number", value_type: "int", default: 50, hint: "Lower = shown first" }
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - label: "Store Settings"
+        name: "store"
+        file: "src/content/settings/store.json"
+        fields:
+          - { label: "Store Name", name: "name", widget: "string" }
+          - { label: "Tagline", name: "tagline", widget: "string" }
+          - { label: "WhatsApp Number", name: "whatsapp", widget: "string" }
+          - { label: "Facebook URL", name: "facebook", widget: "string" }
+          - { label: "Support Email", name: "email", widget: "string" }
+          - label: "Announcement Banner"
+            name: "announcement"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Enabled", name: "enabled", widget: "boolean", default: false }
+              - { label: "Text", name: "text", widget: "string", required: false }

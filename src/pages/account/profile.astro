@@ -1,0 +1,1529 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CartDrawer from '../../components/CartDrawer.astro';
+---
+
+<Layout title="My Account — ArcZen">
+    <Header />
+
+    <!-- Auth guard shown while loading -->
+    <div id="authLoading" class="auth-loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Main content — hidden until auth confirmed -->
+    <div id="profileContent" class="profile-page hidden">
+        <div class="profile-container">
+            <!-- Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-avatar-block">
+                    <div class="avatar-circle" id="avatarCircle">A</div>
+                    <div class="profile-name-block">
+                        <h2 id="sidebarDisplayName">Loading...</h2>
+                        <p id="profileEmail" class="profile-email"></p>
+                    </div>
+                </div>
+                <nav class="profile-nav" id="profileTabs">
+                    <div class="nav-section-label">Account</div>
+                    <button class="pnav-item active" data-tab="overview">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Dashboard
+                    </button>
+                    <button class="pnav-item" data-tab="orders">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        Order History
+                    </button>
+                    <button class="pnav-item" data-tab="settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Personal Settings
+                    </button>
+                    <button class="pnav-item" data-tab="security">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Security
+                    </button>
+
+                    <div class="nav-section-label">Shopping</div>
+                    <a href="/store" class="pnav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        ArcZen Store
+                    </a>
+
+                    <div class="nav-section-label">Session</div>
+                    <button id="signOutBtn" class="pnav-item pnav-danger">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log Out
+                    </button>
+                    
+                    <a href="/" class="pnav-back">
+                        ← Back to Home
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Profile Content Area -->
+            <section class="profile-main">
+                <div id="orderSuccessCelebration" class="order-success-banner hidden">
+                    <div class="celebration-content">
+                        <div class="confetti-icon">🎉</div>
+                        <div class="success-text">
+                            <h3>Order Placed Successfully!</h3>
+                            <p>Your order <strong id="successOrderId">#...</strong> has been received and is being verified.</p>
+                        </div>
+                        <button class="close-banner" onclick="this.parentElement.parentElement.classList.add('hidden')">×</button>
+                    </div>
+                </div>
+
+                <div id="saveSuccess" class="save-toast success hidden">✅ Profile updated successfully!</div>
+                <div id="saveError" class="save-toast error hidden">❌ Failed to update profile. Please try again.</div>
+
+                <!-- Tab: Overview -->
+                <div id="tab-overview" class="tab-content">
+                    <div class="dashboard-hero">
+                        <div class="hero-content">
+                            <h1 id="heroWelcome">Welcome back, ArcZen Member</h1>
+                            <p id="heroSummary">Here's a summary of your account and recent activities.</p>
+                            
+                            <!-- Active Order Status -->
+                            <div id="activeOrderBox" class="active-order-box">
+                                <div class="a-order-status">
+                                    <span class="pulse-dot hidden" id="activeOrderPulse"></span>
+                                    <span id="activeOrderStatusText">You haven't ordered any current purchases.</span>
+                                </div>
+                                <a href="/store" class="track-mini-btn" id="activeOrderBtn" style="text-decoration: none; display: inline-block; text-align: center;">Purchase Here</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-layout">
+                        <!-- Recent Activity / Latest Orders -->
+                        <div id="recentOrdersCard" class="dashboard-card full-width-card hidden">
+                            <div class="card-header">
+                                <h3>Recent Purchases</h3>
+                                <button class="card-edit-tool" onclick="document.querySelector('[data-tab=orders]').click()">View All</button>
+                            </div>
+                            <div id="recentOrdersMiniList" class="mini-orders-grid">
+                                <!-- Populated via Script -->
+                            </div>
+                        </div>
+                        <!-- No Orders CTA Card -->
+                        <div id="noOrdersCard" class="dashboard-card full-width-card hidden">
+                            <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+                                <h3 style="color: var(--gold); margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">Start Your Journey</h3>
+                                <p style="color: var(--text-dim); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                                    No, you have nothing ordered yet. Order something here.
+                                </p>
+                                <a href="/store" class="save-btn" style="text-decoration: none; display: inline-block;">Purchase Here</a>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card info-card">
+                            <div class="card-header">
+                                <h3>Account Details</h3>
+                                <button class="card-edit-tool" onclick="document.querySelector('[data-tab=settings]').click()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="detail-row">
+                                    <span class="d-label">Email</span>
+                                    <span class="d-value" id="viewEmail">—</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="d-label">Phone</span>
+                                    <span class="d-value" id="viewPhone">Not provided</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="d-label">Joined</span>
+                                    <span class="d-value" id="viewJoined">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card address-card">
+                            <div class="card-header">
+                                <h3>Shipping Address</h3>
+                            </div>
+                            <div class="card-body">
+                                <p class="address-text" id="viewAddress">No address saved yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Orders -->
+                <div id="tab-orders" class="tab-content hidden">
+                    <div class="main-header">
+                        <h1 class="section-title">Order History</h1>
+                        <p class="section-sub">Track and manage your digital purchases.</p>
+                    </div>
+                    
+                    <div id="ordersLoading" class="empty-state">
+                        <div class="spinner small"></div>
+                        <p>Loading your orders...</p>
+                    </div>
+
+                    <div id="ordersEmpty" class="empty-state hidden">
+                        <div class="empty-icon">🛍️</div>
+                        <h3 style="color: var(--gold); margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-size: 1.8rem;">No Orders Found</h3>
+                        <p style="margin-bottom: 2rem; color: var(--text-dim);">Make your first order to see it here.</p>
+                        <a href="/store" class="shop-btn" style="text-decoration: none; display: inline-block;">Purchase Now</a>
+                    </div>
+
+                    <div id="ordersList" class="orders-list"></div>
+                </div>
+
+                <!-- Tab: Settings -->
+                <div id="tab-settings" class="tab-content hidden">
+                    <div class="main-header">
+                        <h1 class="section-title">Personal Settings</h1>
+                        <p class="section-sub">Keep your contact and delivery details up to date.</p>
+                    </div>
+                    <form id="profileForm" class="profile-form" method="POST" onsubmit="return false">
+                        <div id="nameChangeWarning" class="name-warning hidden">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <span>Attention: You are eligible to update your name. This can only be done once every 30 days.</span>
+                        </div>
+                        <div class="form-row">
+                            <div class="field-group" id="firstNameGroup">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" placeholder="First Name" />
+                                <div id="firstNameLocked" class="locked-notice hidden">Locked for 30 days</div>
+                            </div>
+                            <div class="field-group" id="lastNameGroup">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" placeholder="Last Name" />
+                                <div id="lastNameLocked" class="locked-notice hidden">Locked for 30 days</div>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label for="editEmail">Email Address</label>
+                            <input type="email" id="editEmail" disabled class="disabled-input" />
+                            <span class="field-hint">Email cannot be changed online.</span>
+                        </div>
+                        <div class="field-group">
+                            <label for="phone">Phone Number</label>
+                            <div class="phone-input-group">
+                                <select id="countryCode" class="country-select">
+                                    <option value="+880">BD (+880)</option>
+                                    <option value="+1">US (+1)</option>
+                                    <option value="+44">UK (+44)</option>
+                                    <option value="+971">UAE (+971)</option>
+                                    <option value="+966">KSA (+966)</option>
+                                    <option value="+60">MY (+60)</option>
+                                    <option value="+65">SG (+65)</option>
+                                    <option value="+91">IN (+91)</option>
+                                </select>
+                                <input type="tel" id="phone" placeholder="1XXXXXXXXX" />
+                            </div>
+                            <span id="phoneError" class="field-error hidden">Please enter a valid phone number</span>
+                        </div>
+                        <div class="field-group">
+                            <label>Delivery Addresses</label>
+                            <div id="addressList" class="address-list">
+                                <!-- JS Injected Content -->
+                            </div>
+                            <button type="button" class="add-address-btn" id="addAddressBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Add New Address
+                            </button>
+                        </div>
+                        
+                        <!-- Hidden Address Edit Form (Simple Modal-like) -->
+                        <div id="addressEditSection" class="dashboard-card hidden" style="background: rgba(198, 167, 94, 0.05); margin-top: 1rem; border-style: dashed;">
+                            <div class="card-header">
+                                <h3 id="addrFormTitle">Add New Address</h3>
+                            </div>
+                            <div class="profile-form">
+                                <div class="field-group">
+                                    <label>Category / Label</label>
+                                    <select id="addrLabel" class="country-select" style="width: 100%;">
+                                        <option value="Home">Home</option>
+                                        <option value="Office">Office</option>
+                                        <option value="Work">Work</option>
+                                        <option value="Billing">Billing</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <label>Street Address</label>
+                                    <textarea id="addrStreet" placeholder="House #, Road, Area..." rows="2"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label>City</label>
+                                        <input type="text" id="addrCity" placeholder="City" />
+                                    </div>
+                                    <div class="field-group">
+                                        <label>District</label>
+                                        <input type="text" id="addrDistrict" placeholder="District" />
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="gap: 1rem;">
+                                    <button type="button" id="saveAddrBtn" class="save-btn" style="padding: 0.8rem 1.5rem; font-size: 0.9rem;">Save Address</button>
+                                    <button type="button" id="cancelAddrBtn" class="pnav-item" style="width: auto; height: 100%;">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="save-btn" id="saveProfileBtn">
+                                <span id="saveBtnText">Save Changes</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab: Security -->
+                <div id="tab-security" class="tab-content hidden">
+                    <div class="main-header">
+                        <h1 class="section-title">Account Security</h1>
+                        <p class="section-sub">Manage your password and account protection.</p>
+                    </div>
+                    
+                    <div class="security-card">
+                        <div id="passwordSecurity" class="full-width">
+                            <div class="sec-info">
+                                <h3>Change Password</h3>
+                                <p id="secDescription">We'll send a secure password reset link to your email address.</p>
+                            </div>
+                            
+                            <!-- Change Password Form (Hidden initially) -->
+                            <form id="changePasswordForm" class="password-form hidden" method="POST" onsubmit="return false">
+                                <div class="field-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" required />
+                                </div>
+                                <div class="field-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" required minlength="6" />
+                                </div>
+                                <button type="submit" class="save-btn" style="width: 100%; margin-top: 1rem;">Update Password</button>
+                            </form>
+
+                            <div class="sec-actions" id="resetActions">
+                                <button id="sendResetBtn" class="reset-btn">Send Reset Email</button>
+                                <span id="resetSent" class="hidden reset-sent">✅ Check your inbox!</span>
+                            </div>
+
+                            <!-- Google Info -->
+                            <div id="googleBadge" class="google-provider-badge hidden">
+                                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                                <span>Logged in with Google. Password managed by your Google Account.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="security-note">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>If you think your account has been compromised, please contact support immediately.</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <CartDrawer />
+    <style is:global>
+    /* Order Success Banner */
+    .order-success-banner {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+        border: 1.5px solid rgba(16, 185, 129, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        backdrop-filter: blur(10px);
+    }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    .celebration-content { display: flex; align-items: center; gap: 1.5rem; }
+    .confetti-icon { font-size: 2.5rem; animation: bounce 1s infinite alternate; }
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+    .success-text h3 { margin: 0; color: #34d399; font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+    .success-text p { margin: 5px 0 0; color: var(--text-dim); font-size: 0.95rem; }
+    .success-text strong { color: var(--gold); }
+    .close-banner { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-dim); cursor: pointer; opacity: 0.6; transition: 0.2s; }
+    .close-banner:hover { color: #fff; opacity: 1; }
+
+    :root {
+        --gold: #c6a75e;
+        --gold-light: #e8c87a;
+        --dark-bg: #0a0c10;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(198, 167, 94, 0.15);
+        --text-main: #f5f2eb;
+        --text-dim: #9a9387;
+        --error: #ef4444;
+        --success: #10b981;
+    }
+
+    /* Override global body background for the dark-themed profile page */
+    body:has(.profile-page),
+    body:has(.auth-loading) {
+        background: var(--dark-bg) !important;
+    }
+
+    .auth-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--dark-bg); }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(198,167,94,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner.small { width: 24px; height: 24px; margin: 0 auto 0.5rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+
+    .profile-page { 
+        min-height: 100vh; 
+        padding: 160px 2rem 80px; 
+        background: radial-gradient(circle at 10% 20%, rgba(198,167,94,0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(198,167,94,0.05) 0%, transparent 40%),
+                    var(--dark-bg);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .profile-container { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        display: grid; 
+        grid-template-columns: 320px 1fr; 
+        gap: 3rem; 
+        align-items: start;
+    }
+
+    .profile-sidebar { 
+        background: rgba(15, 17, 22, 0.8); 
+        border: 1px solid var(--glass-border); 
+        border-radius: 32px; 
+        padding: 3rem 1.5rem; 
+        position: sticky; 
+        top: 160px;
+        backdrop-filter: blur(30px);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .profile-avatar-block { display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; gap: 1.5rem; }
+    .avatar-circle { 
+        width: 100px; height: 100px; border-radius: 50%; 
+        background: linear-gradient(135deg, var(--gold), var(--gold-light)); 
+        color: #1a1200; font-size: 2.5rem; font-weight: 800; 
+        display: flex; align-items: center; justify-content: center; 
+        box-shadow: 0 10px 30px rgba(198,167,94,0.4);
+        border: 4px solid rgba(255,255,255,0.1);
+    }
+    .profile-name-block h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin: 0; color: var(--text-main); text-align: center; }
+    .profile-email { font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; opacity: 0.8; word-break: break-all; }
+
+    .profile-nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav-section-label { 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        color: var(--gold); 
+        text-transform: uppercase; 
+        letter-spacing: 0.2em; 
+        margin: 2rem 0 1rem 12px;
+        opacity: 0.6;
+    }
+    .nav-section-label:first-child { margin-top: 0; }
+    
+    .pnav-item { 
+        display: flex; align-items: center; gap: 14px; 
+        padding: 14px 20px; border-radius: 16px; 
+        color: var(--text-dim); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent; border: 1px solid transparent; 
+        cursor: pointer; width: 100%; text-align: left; 
+        font-family: inherit; font-size: 1rem; font-weight: 500;
+    }
+    .pnav-item svg { opacity: 0.6; transition: all 0.3s; }
+    .pnav-item:hover { background: rgba(198,167,94,0.06); color: var(--gold-light); border-color: rgba(198,167,94,0.1); }
+    .pnav-item:hover svg { opacity: 1; transform: scale(1.1); }
+    .pnav-item.active { background: rgba(198, 167, 94, 0.12); color: var(--gold); border-color: rgba(198, 167, 94, 0.2); font-weight: 700; }
+    .pnav-item.active svg { opacity: 1; }
+    .pnav-danger:hover { background: rgba(239, 68, 68, 0.08); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+    
+    .pnav-back { 
+        display: block; margin-top: 2rem; padding: 15px 20px; 
+        font-size: 0.9rem; color: var(--text-dim); transition: all 0.3s; 
+        border-top: 1px solid rgba(255,255,255,0.05); text-decoration: none;
+    }
+    .pnav-back:hover { color: var(--gold); transform: translateX(-4px); }
+
+    /* Main Area */
+    .profile-main { min-height: 800px; animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Dashboard Hero */
+    .dashboard-hero { 
+        background: linear-gradient(135deg, rgba(198,167,94,0.15), rgba(10,12,16,0.6));
+        border: 1px solid var(--glass-border); 
+        border-radius: 32px; 
+        padding: 4rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 3rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    .dashboard-hero::before {
+        content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle at center, rgba(198,167,94,0.1) 0%, transparent 70%);
+        animation: pulse 10s infinite alternate;
+    }
+    @keyframes pulse { from { transform: translate(-10%, -10%); } to { transform: translate(10%, 10%); } }
+
+    .hero-content h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0 0 1rem; color: var(--text-main); }
+    .hero-content p { color: var(--text-dim); font-size: 1.1rem; margin: 0; opacity: 0.9; }
+    
+    .hero-stats { display: flex; gap: 3rem; position: relative; z-index: 1; }
+    .stat-box { text-align: right; }
+    .stat-val { display: block; font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; color: var(--gold); line-height: 1; }
+    .stat-lbl { font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; margin-top: 0.5rem; display: block; }
+
+    /* Active Order Box */
+    .active-order-box {
+        margin-top: 2rem; background: rgba(198, 167, 94, 0.1); 
+        border: 1px solid rgba(198, 167, 94, 0.2); border-radius: 16px; 
+        padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .a-order-status { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--gold-light); }
+    .pulse-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: pulse-blink 1.5s infinite; }
+    @keyframes pulse-blink { 0% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.4; transform: scale(0.8); } }
+    .track-mini-btn { background: var(--gold); color: #1a1200; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
+    .track-mini-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    /* Cards */
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+    .full-width-card { grid-column: 1 / -1; }
+    .dashboard-card { 
+        background: var(--card-bg); 
+        border: 1px solid var(--glass-border); 
+        border-radius: 28px; 
+        padding: 2.5rem; 
+        backdrop-filter: blur(20px);
+        transition: all 0.3s;
+    }
+    .dashboard-card:hover { border-color: rgba(198, 167, 94, 0.4); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .card-header h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 0; color: var(--gold-light); }
+    .card-edit-tool { background: rgba(198,167,94,0.1); border: none; color: var(--gold); padding: 10px; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+    .card-edit-tool:hover { background: var(--gold); color: #1a1200; }
+
+    .detail-row { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .detail-row:last-child { margin-bottom: 0; }
+    .d-label { font-size: 0.75rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+    .d-value { font-size: 1.1rem; color: var(--text-main); font-weight: 500; }
+    .address-text { line-height: 1.8; color: var(--text-main); font-size: 1.05rem; white-space: pre-line; }
+
+    /* Orders Section */
+    .section-title { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--text-main); margin: 0 0 0.5rem; }
+    .section-sub { color: var(--text-dim); margin-bottom: 3rem; font-size: 1.1rem; }
+    
+    .empty-state { text-align: center; padding: 4rem 2rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--glass-border); border-radius: 24px; margin-bottom: 2rem; }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.8; }
+    .shop-btn { padding: 1rem 2.5rem; background: var(--gold); color: #1a1200; font-weight: 800; border-radius: 12px; transition: all 0.3s; box-shadow: 0 5px 15px rgba(198,167,94,0.2); }
+    .shop-btn:hover { background: var(--gold-light); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(198,167,94,0.4); }
+
+    .orders-list { display: flex; flex-direction: column; gap: 2rem; }
+    .order-card { 
+        background: rgba(255, 255, 255, 0.02); 
+        border: 1px solid var(--glass-border); 
+        border-radius: 24px; 
+        padding: 2rem;
+        transition: all 0.3s;
+    }
+    .order-card:hover { border-color: var(--gold); background: rgba(255,255,255,0.04); }
+    
+    .order-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.5rem; }
+    .order-id { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-weight: 700; }
+    .order-status { padding: 6px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+    .status-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+    .status-confirmed { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-delivered { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    .order-item { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1rem; }
+    .item-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: #000; border: 1px solid rgba(255,255,255,0.1); }
+    .item-info { flex: 1; }
+    .item-name { display: block; font-weight: 600; color: var(--text-main); }
+    .item-variant { font-size: 0.85rem; color: var(--text-dim); }
+    .item-price-qty { text-align: right; }
+
+    /* Address Management UI */
+    .address-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+    .address-item { 
+        background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); 
+        border-radius: 16px; padding: 1.5rem; display: flex; justify-content: space-between; 
+        align-items: flex-start; transition: 0.3s;
+    }
+    .address-item:hover { border-color: var(--gold); background: rgba(255,255,255,0.04); }
+    .address-item.default { border-color: var(--gold); background: rgba(198, 167, 94, 0.05); }
+    
+    .addr-info { flex: 1; }
+    .addr-tag { 
+        display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; 
+        font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; 
+        background: rgba(198, 167, 94, 0.1); color: var(--gold); margin-bottom: 0.5rem;
+    }
+    .addr-text { font-size: 1rem; line-height: 1.5; color: var(--text-main); }
+    .addr-meta { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem; display: flex; gap: 1rem; }
+    
+    .addr-actions { display: flex; gap: 8px; }
+    .addr-btn { 
+        background: none; border: none; color: var(--text-dim); cursor: pointer; 
+        padding: 8px; border-radius: 8px; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+    }
+    .addr-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+    .addr-btn.delete:hover { color: var(--error); background: rgba(239, 68, 68, 0.1); }
+    .addr-btn.edit:hover { color: var(--gold); background: rgba(198, 167, 94, 0.1); }
+
+    .add-address-btn { 
+        width: 100%; padding: 1rem; background: transparent; border: 1.5px dashed var(--glass-border); 
+        border-radius: 16px; color: var(--gold); font-weight: 700; cursor: pointer; 
+        transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .add-address-btn:hover { background: rgba(198, 167, 94, 0.05); border-color: var(--gold); }
+
+    /* Name Change Warning */
+    .name-warning { 
+        background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2); 
+        border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 12px; align-items: center;
+        color: #fbbf24; font-size: 0.9rem; line-height: 1.4;
+    }
+    .name-warning svg { flex-shrink: 0; }
+    .field-locked { opacity: 0.7; pointer-events: none; }
+    .locked-notice { font-size: 0.75rem; color: #fbbf24; margin-top: 0.5rem; font-weight: 600; }
+
+    /* Settings & Forms */
+    .profile-form { display: flex; flex-direction: column; gap: 2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .field-group label { display: block; font-size: 0.8rem; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+    .field-group input, .field-group textarea, .country-select, .addr-label-select { 
+        width: 100%; padding: 1.2rem; background: rgba(255,255,255,0.03); 
+        border: 1px solid var(--glass-border); border-radius: 16px; 
+        color: var(--text-main); font-family: inherit; font-size: 1rem;
+        transition: all 0.3s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c6a75e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.2em;
+    }
+    .field-group input:focus, .field-group textarea:focus, .addr-label-select:focus { border-color: var(--gold); background: rgba(255,255,255,0.05); outline: none; }
+    
+    /* Dropdown Visibility Fix */
+    select option {
+        background-color: #1a1a1a;
+        color: #fff;
+        padding: 10px;
+    }
+    .disabled-input { opacity: 0.5; cursor: not-allowed; }
+    
+    .phone-input-group { display: flex; gap: 12px; }
+    .country-select { width: 140px; }
+    
+    .save-btn { 
+        padding: 1.2rem 3rem; background: linear-gradient(135deg, var(--gold), var(--gold-light)); 
+        color: #1a1200; border: none; border-radius: 16px; 
+        font-weight: 800; font-size: 1.1rem; cursor: pointer; 
+        transition: all 0.3s; box-shadow: 0 10px 20px rgba(198,167,94,0.3);
+    }
+    .save-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(198,167,94,0.4); }
+
+    .order-footer { 
+        margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; 
+        border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.2rem; 
+    }
+    .o-date { font-size: 0.85rem; color: var(--text-dim); }
+    .o-total { font-weight: 700; color: var(--gold-light); font-size: 1.1rem; }
+
+    .o-delivery-note { 
+        margin-top: 1.5rem; padding: 1.2rem; background: rgba(16, 185, 129, 0.05); 
+        border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; 
+    }
+    .o-delivery-note strong { display: block; font-size: 0.75rem; color: #34d399; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .o-delivery-note code { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--text-main); }
+
+    .order-actions-row { display: flex; gap: 12px; margin-top: 1.5rem; }
+    .o-action-btn { 
+        flex: 1; padding: 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; 
+        cursor: pointer; transition: all 0.3s; text-align: center; text-decoration: none;
+        background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: var(--text-main);
+    }
+    .o-action-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--gold); color: var(--gold); }
+    .o-action-btn.primary { background: var(--gold); border: none; color: #1a1200; }
+    .o-action-btn.primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(198,167,94,0.3); }
+
+    /* Security Provider */
+    .full-width { width: 100%; }
+    .google-provider-badge { 
+        display: flex; align-items: center; gap: 12px; padding: 1.5rem; 
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); 
+        border-radius: 16px; margin-top: 2rem; color: var(--text-dim); font-size: 0.9rem;
+    }
+    .password-form { margin-top: 2rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* Security */
+    .security-card { 
+        background: rgba(239, 68, 68, 0.05); 
+        border: 1px solid rgba(239, 68, 68, 0.1); 
+        padding: 2.5rem 3rem; 
+        border-radius: 32px; 
+        display: flex; 
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem; 
+    }
+    .sec-info h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #f87171; margin: 0 0 0.5rem; }
+    .sec-info p { color: var(--text-dim); font-size: 0.95rem; margin: 0; }
+    .sec-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .reset-btn { padding: 1rem 2rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-family: inherit; font-size: 1rem; }
+    .reset-btn:hover { background: #ef4444; color: #fff; }
+    .reset-sent { color: var(--success); font-size: 0.9rem; font-weight: 600; }
+
+    .mini-orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+    .mini-order-item { 
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); 
+        border-radius: 16px; padding: 1.2rem; display: flex; justify-content: space-between; align-items: center;
+        transition: 0.3s; cursor: pointer;
+    }
+    .mini-order-item:hover { border-color: var(--gold); background: rgba(255,255,255,0.06); transform: translateX(5px); }
+    .mo-info { display: flex; flex-direction: column; gap: 4px; }
+    .mo-id { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: 0.9rem; font-weight: 700; }
+    .mo-status { font-size: 0.7rem; text-transform: uppercase; font-weight: 800; }
+    .mo-arrow { color: var(--gold); opacity: 0.5; }
+
+    /* Order Card Additions */
+    .o-delivery-note {
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px dashed rgba(16, 185, 129, 0.4);
+        border-radius: 12px;
+    }
+    .o-delivery-note strong {
+        display: flex;
+        align-items: center;
+        color: var(--success);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.8rem;
+    }
+    .o-delivery-note code {
+        display: block;
+        background: #000;
+        padding: 1rem;
+        border-radius: 8px;
+        color: #fff;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        word-break: break-all;
+    }
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        margin-bottom: 1.2rem;
+    }
+
+    /* Print Styles */
+    @media print {
+        body * { visibility: hidden; }
+        #receipt-print-wrapper, #receipt-print-wrapper * { visibility: visible; }
+        #receipt-print-wrapper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: #fff !important;
+            color: #000 !important;
+            padding: 40px;
+        }
+        .order-card, .profile-container, nav, footer { display: none !important; }
+    }
+
+    #receipt-print-wrapper {
+        background: #fff;
+        color: #111;
+        font-family: 'Inter', sans-serif;
+    }
+    .r-header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center; }
+    .r-logo { height: 40px; filter: grayscale(1) contrast(10); }
+    .r-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+    .r-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+    .r-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .r-val { font-size: 13px; font-weight: 500; }
+    .r-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .r-table th { text-align: left; font-size: 10px; text-transform: uppercase; padding: 12px 8px; border-bottom: 1px solid #eee; }
+    .r-table td { padding: 12px 8px; border-bottom: 1px solid #fafafa; font-size: 13px; }
+    .r-summary { margin-left: auto; width: 250px; font-size: 14px; }
+    .r-sum-row { display: flex; justify-content: space-between; padding: 8px 0; }
+    .r-total { font-weight: 800; font-size: 18px; border-top: 2px solid #eee; margin-top: 10px; padding-top: 10px; }
+    .r-footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #eee; font-size: 9px; color: #888; text-align: center; line-height: 1.6; }
+
+    /* Save toasts */
+    .save-toast {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    .save-toast.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; }
+    .save-toast.error   { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+
+    /* Field hint and error */
+    .field-hint { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.4rem; display: block; }
+    .field-error { font-size: 0.78rem; color: var(--error); margin-top: 0.4rem; display: block; font-weight: 600; }
+
+    /* Main header area */
+    .main-header { margin-bottom: 3rem; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--text-main); margin: 0 0 0.5rem; }
+    .section-sub { color: var(--text-dim); margin-bottom: 0; font-size: 1.1rem; }
+
+    /* Security note */
+    .security-note {
+        display: flex; align-items: center; gap: 12px;
+        padding: 1.2rem 1.5rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 16px;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .security-note svg { flex-shrink: 0; color: var(--gold); opacity: 0.7; }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+        .profile-container { grid-template-columns: 1fr; }
+        .profile-sidebar { position: static; max-width: 100%; border-radius: 28px; }
+        .dashboard-hero { flex-direction: column; text-align: center; gap: 2rem; }
+        .hero-stats { justify-content: center; width: 100%; }
+    }
+    
+    @media (max-width: 768px) {
+        .profile-page { padding: 130px 0 120px; }
+        .profile-container { gap: 0; }
+        .profile-sidebar { 
+            position: sticky; top: 70px; z-index: 100;
+            border-radius: 0; border: none; border-bottom: 1px solid var(--glass-border);
+            padding: 1.5rem 1rem 0; width: 100%; backdrop-filter: blur(40px);
+            background: rgba(10, 12, 16, 0.95);
+        }
+        .profile-avatar-block { display: none; }
+        
+        .profile-nav { 
+            flex-direction: row; overflow-x: auto; padding-bottom: 1rem;
+            scrollbar-width: none; -ms-overflow-style: none;
+            gap: 10px;
+        }
+        .profile-nav::-webkit-scrollbar { display: none; }
+        .nav-section-label { display: none; }
+        .pnav-item { 
+            white-space: nowrap; flex-shrink: 0; padding: 10px 18px; 
+            font-size: 0.85rem; border-radius: 12px; width: auto;
+        }
+        .pnav-back { display: none; }
+        
+        .profile-main { padding: 2rem 1rem; }
+        .dashboard-hero { padding: 2rem 1.5rem; border-radius: 20px; }
+        .hero-content h1 { font-size: 1.8rem; }
+        .active-order-box { flex-direction: column; text-align: center; gap: 1rem; }
+        .track-mini-btn { width: 100%; }
+
+        .grid-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+        .dashboard-card { padding: 2rem 1.5rem; border-radius: 20px; }
+        .form-row { grid-template-columns: 1fr; gap: 1.5rem; }
+        .security-card { padding: 2rem 1.5rem; }
+    }
+
+    /* Mobile bottom nav bar (very small screens) */
+    @media (max-width: 480px) {
+        .profile-sidebar { 
+            position: fixed; bottom: 0; top: auto; left: 0; right: 0; 
+            border-radius: 32px 32px 0 0; border: none; border-top: 1px solid var(--glass-border);
+            padding: 1rem; z-index: 1000; box-shadow: 0 -20px 40px rgba(0,0,0,0.5);
+            background: rgba(10, 12, 16, 0.98); backdrop-filter: blur(20px);
+        }
+        .profile-avatar-block { display: none; }
+        .profile-nav { flex-direction: row; justify-content: space-around; gap: 4px; }
+        .nav-section-label { display: none; }
+        .pnav-item { 
+            flex-direction: column; gap: 4px; padding: 8px; font-size: 0.65rem; 
+            text-align: center; border-radius: 12px; border: none; width: auto;
+            flex: 1; min-width: 60px;
+        }
+        .pnav-item svg { width: 22px; height: 22px; opacity: 0.8; }
+        .pnav-item.active { background: rgba(198, 167, 94, 0.1); }
+        .pnav-back, #signOutBtn, a[href="/store"] { display: none; }
+        .profile-page { padding-bottom: 120px; }
+    }
+</style>
+
+<script>
+    import { clientAuth, clientDb, logActivity } from '../../lib/firebase-client';
+    import { onAuthStateChanged, signOut, sendPasswordResetEmail, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+    import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
+
+    function formatDate(ts: any): string {
+        if (!ts) return '—';
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    const STATUS_LABELS: Record<string, string> = {
+        pending:     'Waiting Verification',
+        received:    'Payment Received',
+        confirmed:   'Payment Verified',
+        in_progress: 'Work in Progress',
+        processing:  'Processing',
+        shipped:     'Shipped',
+        delivered:   'Order Delivered',
+        cancelled:   'Cancelled',
+    };
+
+    const STATUS_SUBTEXT: Record<string, string> = {
+        pending:     'Our admins will verify your payment soon.',
+        received:    'Payment Received - Work is Pending',
+        confirmed:   'Payment Verified - Work in Queueing...',
+        in_progress: 'Our team is currently preparing your assets.',
+        delivered:   'Your digital assets are ready below.',
+    };
+
+    onAuthStateChanged(clientAuth, async (user) => {
+        const loadingScreen = document.getElementById('authLoading');
+        const profileContent = document.getElementById('profileContent');
+        
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+        if (!user) { window.location.replace('/account/login'); return; }
+        if (profileContent) profileContent.classList.remove('hidden');
+
+        // Log page_viewed — fire and forget
+        logActivity('page_viewed', { page: '/account/profile', tab: 'overview' });
+
+        // State Manager
+        let currentAddresses = [];
+        let editingAddrIndex = -1;
+        let originalProfile = null;
+
+        // Security Provider Logic
+        const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+        const googleBadge = document.getElementById('googleBadge');
+        const resetActions = document.getElementById('resetActions');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        const secDescription = document.getElementById('secDescription');
+
+        if (isGoogle) {
+            googleBadge?.classList.remove('hidden');
+            resetActions?.classList.add('hidden');
+            secDescription?.classList.add('hidden');
+        } else {
+            changePasswordForm?.classList.remove('hidden');
+            resetActions?.classList.add('hidden');
+            if (secDescription) secDescription.textContent = 'Enter your current and new password to update.';
+        }
+
+        // Tab Switching Logic
+        const tabBtns = document.querySelectorAll('#profileTabs .pnav-item[data-tab]');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                tabContents.forEach(content => {
+                    content.classList.toggle('hidden', content.id !== `tab-${targetTab}`);
+                });
+                logActivity('page_viewed', { page: '/account/profile', tab: targetTab || 'unknown' });
+            });
+        });
+
+        // Basic Info Setup
+        const initials = (user.displayName || user.email || 'A').charAt(0).toUpperCase();
+        const avatarCircle = document.getElementById('avatarCircle');
+        const sidebarDisplayName = document.getElementById('sidebarDisplayName');
+        const profileEmail = document.getElementById('profileEmail');
+        const editEmailInput = document.getElementById('editEmail') as HTMLInputElement;
+
+        if (avatarCircle) avatarCircle.textContent = initials;
+        if (sidebarDisplayName) sidebarDisplayName.textContent = user.displayName || 'ArcZen Member';
+        if (profileEmail) profileEmail.textContent = user.email || '';
+        if (editEmailInput) editEmailInput.value = user.email || '';
+
+        // Address Rendering Helper
+        const renderAddresses = () => {
+            const list = document.getElementById('addressList');
+            if (!list) return;
+            
+            if (!currentAddresses || currentAddresses.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-dim); font-size: 0.9rem; padding: 1rem;">No addresses saved yet.</p>';
+                return;
+            }
+
+            list.innerHTML = currentAddresses.map((addr: any, index: number) => `
+                <div class="address-item ${addr.isDefault ? 'default' : ''}">
+                    <div class="addr-info">
+                        <span class="addr-tag">${addr.label || 'Other'}</span>
+                        <div class="addr-text">${addr.street}, ${addr.city}, ${addr.district}</div>
+                        ${addr.isDefault ? '<div class="addr-meta"><span style="color: var(--gold); font-weight: 700;">• Default Address</span></div>' : ''}
+                    </div>
+                    <div class="addr-actions">
+                        <button type="button" class="addr-btn edit" data-index="${index}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button type="button" class="addr-btn delete" data-index="${index}" ${currentAddresses.length === 1 ? 'disabled style="opacity: 0.2;"' : ''}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach listeners
+            list.querySelectorAll('.addr-btn.edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt((e.currentTarget as HTMLElement).dataset.index!);
+                    startEditAddress(idx);
+                });
+            });
+            list.querySelectorAll('.addr-btn.delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt((e.currentTarget as HTMLElement).dataset.index!);
+                    if (confirm('Are you sure you want to delete this address?')) {
+                        const wasDefault = currentAddresses[idx].isDefault;
+                        currentAddresses.splice(idx, 1);
+                        if (wasDefault && currentAddresses.length > 0) currentAddresses[0].isDefault = true;
+                        renderAddresses();
+                    }
+                });
+            });
+        };
+
+        const startEditAddress = (index = -1) => {
+            editingAddrIndex = index;
+            const section = document.getElementById('addressEditSection')!;
+            const title = document.getElementById('addrFormTitle')!;
+            const label = document.getElementById('addrLabel') as HTMLSelectElement;
+            const street = document.getElementById('addrStreet') as HTMLTextAreaElement;
+            const city = document.getElementById('addrCity') as HTMLInputElement;
+            const district = document.getElementById('addrDistrict') as HTMLInputElement;
+
+            section.classList.remove('hidden');
+            if (index > -1) {
+                const a = currentAddresses[index];
+                title.textContent = 'Edit Address';
+                label.value = a.label;
+                street.value = a.street;
+                city.value = a.city;
+                district.value = a.district;
+            } else {
+                title.textContent = 'Add New Address';
+                label.value = 'Home';
+                street.value = '';
+                city.value = '';
+                district.value = '';
+            }
+            section.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Address Form Handlers
+        document.getElementById('addAddressBtn')?.addEventListener('click', () => startEditAddress());
+        document.getElementById('cancelAddrBtn')?.addEventListener('click', () => {
+            document.getElementById('addressEditSection')?.classList.add('hidden');
+        });
+        document.getElementById('saveAddrBtn')?.addEventListener('click', () => {
+            const label = (document.getElementById('addrLabel') as HTMLSelectElement).value;
+            const street = (document.getElementById('addrStreet') as HTMLTextAreaElement).value.trim();
+            const city = (document.getElementById('addrCity') as HTMLInputElement).value.trim();
+            const district = (document.getElementById('addrDistrict') as HTMLInputElement).value.trim();
+
+            if (!street || !city || !district) { alert('Please fill in all address fields.'); return; }
+
+            const newAddr = { label, street, city, district, isDefault: currentAddresses.length === 0 };
+
+            if (editingAddrIndex > -1) {
+                currentAddresses[editingAddrIndex] = { ...currentAddresses[editingAddrIndex], ...newAddr };
+            } else {
+                currentAddresses.push(newAddr);
+            }
+
+            document.getElementById('addressEditSection')?.classList.add('hidden');
+            renderAddresses();
+        });
+
+        // UI Update Helper
+        const updateUIWithData = (data: any) => {
+            originalProfile = data;
+            const fullName = data.name || user.displayName || 'ArcZen Member';
+            const heroWelcome = document.getElementById('heroWelcome');
+            const viewEmail = document.getElementById('viewEmail');
+            const viewPhone = document.getElementById('viewPhone');
+            const viewJoined = document.getElementById('viewJoined');
+            const viewAddress = document.getElementById('viewAddress');
+
+            const firstName = data.firstName || fullName.split(' ')[0];
+            if (heroWelcome) heroWelcome.textContent = `Welcome back, ${firstName}`;
+            if (viewEmail) viewEmail.textContent = user.email || '—';
+            if (viewPhone) viewPhone.textContent = data.phone || 'Not provided';
+            if (viewJoined) {
+                const joinedDate = data.createdAt ? formatDate(data.createdAt) : 'Member';
+                viewJoined.textContent = joinedDate;
+            }
+            
+            // Addresses
+            currentAddresses = data.addresses || [];
+            if (currentAddresses.length === 0 && data.address) {
+                // Migrate old address if exists
+                currentAddresses = [{ label: 'Home', street: data.address, city: 'Unknown', district: 'Unknown', isDefault: true }];
+            }
+            
+            const defAddr = currentAddresses.find((a: any) => a.isDefault) || currentAddresses[0];
+            if (viewAddress) {
+                viewAddress.textContent = defAddr ? `${defAddr.street}\n${defAddr.city}, ${defAddr.district}` : 'No address saved yet';
+            }
+            renderAddresses();
+
+            if (sidebarDisplayName) sidebarDisplayName.textContent = fullName;
+
+            // Name Change Rule Enforcement
+            const warning = document.getElementById('nameChangeWarning');
+            const fNameInput = document.getElementById('firstName') as HTMLInputElement;
+            const lNameInput = document.getElementById('lastName') as HTMLInputElement;
+            const fLocked = document.getElementById('firstNameLocked');
+            const lLocked = document.getElementById('lastNameLocked');
+
+            if (data.lastNameChange) {
+                const lastChange = data.lastNameChange.toDate ? data.lastNameChange.toDate() : new Date(data.lastNameChange);
+                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                const nextEligible = lastChange.getTime() + thirtyDays;
+                const now = new Date().getTime();
+
+                if (now < nextEligible) {
+                    const daysLeft = Math.ceil((nextEligible - now) / (1000 * 60 * 60 * 24));
+                    fNameInput.classList.add('disabled-input', 'field-locked');
+                    lNameInput.classList.add('disabled-input', 'field-locked');
+                    fLocked?.classList.remove('hidden');
+                    lLocked?.classList.remove('hidden');
+                    if (fLocked) fLocked.textContent = `Locked for ${daysLeft} more days`;
+                    if (lLocked) lLocked.textContent = `Locked for ${daysLeft} more days`;
+                    warning?.classList.add('hidden');
+                } else {
+                    warning?.classList.remove('hidden');
+                    fNameInput.classList.remove('disabled-input', 'field-locked');
+                    lNameInput.classList.remove('disabled-input', 'field-locked');
+                }
+            } else {
+                warning?.classList.remove('hidden');
+            }
+
+            // Update Settings Inputs
+            const phoneInput = document.getElementById('phone') as HTMLInputElement;
+            const countryCodeSelect = document.getElementById('countryCode') as HTMLSelectElement;
+
+            if (fNameInput) fNameInput.value = data.firstName || fullName.split(' ')[0] || '';
+            if (lNameInput) lNameInput.value = data.lastName || fullName.split(' ').slice(1).join(' ') || '';
+
+            if (phoneInput && countryCodeSelect && data.phone) {
+                const match = data.phone.match(/^(\+\d+)\s*(.*)$/);
+                if (match) {
+                    countryCodeSelect.value = match[1];
+                    phoneInput.value = match[2];
+                } else {
+                    phoneInput.value = data.phone;
+                }
+            }
+        };
+
+        // Fetch Main Data
+        const loadProfileData = async () => {
+            const ordersLoading = document.getElementById('ordersLoading');
+            const ordersEmpty = document.getElementById('ordersEmpty');
+            const ordersList = document.getElementById('ordersList');
+            const recentOrdersCard = document.getElementById('recentOrdersCard');
+            const recentOrdersMiniList = document.getElementById('recentOrdersMiniList');
+
+            try {
+                onSnapshot(doc(clientDb, 'customers', user.uid), (snap) => {
+                    if (snap.exists()) updateUIWithData(snap.data());
+                    else updateUIWithData({});
+                });
+
+                const ordersQ = query(collection(clientDb, 'orders'), where('customerId', '==', user.uid));
+                const ordersSnap = await getDocs(ordersQ);
+                const orders = ordersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                (window as any)._allOrders = orders;
+                
+                if (ordersLoading) ordersLoading.classList.add('hidden');
+
+                if (!ordersSnap.empty) {
+                    orders.sort((a: any, b: any) => {
+                        const dateA = a.createdAt?.seconds || (a.createdAt instanceof Date ? a.createdAt.getTime() / 1000 : 0);
+                        const dateB = b.createdAt?.seconds || (b.createdAt instanceof Date ? b.createdAt.getTime() / 1000 : 0);
+                        return dateB - dateA;
+                    });
+
+                    // 1. Overview Tab: Recent Orders Mini Card
+                    const activeOrdersList = orders.filter((o: any) => ['pending', 'received', 'confirmed', 'in_progress', 'processing', 'shipped'].includes(o.status));
+                    const activeOrder = activeOrdersList[0];
+
+                    if (recentOrdersCard && recentOrdersMiniList) {
+                        if (activeOrdersList.length > 0) {
+                            recentOrdersCard.classList.remove('hidden');
+                            const h3 = recentOrdersCard.querySelector('h3');
+                            if (h3) h3.textContent = 'Active Orders';
+                            const top3 = activeOrdersList.slice(0, 3);
+                            recentOrdersMiniList.innerHTML = top3.map((o: any) => `
+                                <div class="mini-order-item" onclick="document.querySelector('[data-tab=orders]').click(); setTimeout(() => { document.getElementById('order-${o.id}')?.scrollIntoView({behavior:'smooth'}) }, 100)">
+                                    <div class="mo-info">
+                                        <span class="mo-id">#${o.id.slice(0, 8).toUpperCase()}</span>
+                                        <span class="mo-status status-${o.status}" style="background:none; border:none; padding:0; font-size:0.65rem;">${STATUS_LABELS[o.status] || o.status}</span>
+                                    </div>
+                                    <div class="mo-arrow">→</div>
+                                </div>
+                            `).join('');
+                        } else {
+                            recentOrdersCard.classList.add('hidden');
+                        }
+                    }
+
+                    // 2. Overview Tab: Active Order Box
+                    const activeOrderStatusText = document.getElementById('activeOrderStatusText');
+                    const activeOrderPulse = document.getElementById('activeOrderPulse');
+                    const activeOrderBtn = document.getElementById('activeOrderBtn') as HTMLAnchorElement;
+
+                    if (activeOrder) {
+                        const baseText = `Current: Order #${activeOrder.id.slice(0,8).toUpperCase()} is ${STATUS_LABELS[activeOrder.status]}`;
+                        const subText = STATUS_SUBTEXT[activeOrder.status] ? ` — ${STATUS_SUBTEXT[activeOrder.status]}` : '';
+                        if (activeOrderStatusText) activeOrderStatusText.textContent = baseText + subText;
+                        if (activeOrderPulse) activeOrderPulse.classList.remove('hidden');
+                        if (activeOrderBtn) {
+                            activeOrderBtn.textContent = 'Manage Order';
+                            activeOrderBtn.href = '#';
+                            activeOrderBtn.onclick = (e) => {
+                                e.preventDefault();
+                                document.querySelector('[data-tab=orders]').click();
+                                setTimeout(() => { document.getElementById('order-' + activeOrder.id)?.scrollIntoView({behavior:'smooth'}) }, 100);
+                            };
+                        }
+                    } else {
+                        if (activeOrderStatusText) activeOrderStatusText.textContent = `You haven't ordered any current purchases.`;
+                        if (activeOrderPulse) activeOrderPulse.classList.add('hidden');
+                        if (activeOrderBtn) {
+                            activeOrderBtn.textContent = 'Make your first order';
+                            activeOrderBtn.href = '/store';
+                            activeOrderBtn.onclick = (e) => {
+                                e.preventDefault();
+                                window.location.href = '/store';
+                            };
+                        }
+                    }
+
+                    // 3. Orders Tab: Full List
+                    if (ordersList) {
+                        ordersList.innerHTML = orders.map((o: any) => {
+                            const status = o.status || 'pending';
+                            const itemsHtml = (o.items || []).map((item: any, idx: number) => `
+                                <div class="order-item">
+                                    <img src="${item.image || '/assets/images/logo-placeholder.svg'}" class="item-img" onerror="this.src='/assets/images/logo-placeholder.svg'">
+                                    <div class="item-info"><span class="item-name">${item.title}</span><span class="item-variant">${item.variant || 'Standard'}</span></div>
+                                    <div class="item-price-qty"><div>৳${(item.price || 0).toLocaleString()}</div><div style="font-size: 0.75rem; color: #9a9387">Qty: ${item.quantity || 1}</div></div>
+                                </div>
+                                ${(o.fulfillment && o.fulfillment[item.uniqueId || item.id || idx]) ? `
+                                    <div class="o-delivery-note" style="margin-top:0; margin-bottom:1rem; border-style:solid; border-width:1px;">
+                                        <strong style="font-size:0.6rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.77 7.77a5.5 5.5 0 0 1 7.77-7.77zm0 0L22 22"/></svg> ITEM-SPECIFIC DELIVERY</strong>
+                                        <code style="padding:0.75rem; font-size:0.75rem;">${o.fulfillment[item.uniqueId || item.id || idx].payload.replace(/\n/g, '<br>')}</code>
+                                    </div>
+                                ` : ''}
+                            `).join('');
+
+                            const subInfo = STATUS_SUBTEXT[status] || '';
+                            const estTime = (status === 'confirmed' && o.estimatedTime) ? `<div style="font-size:0.8rem; color: var(--gold); margin-top:0.5rem;">🕒 Estimated Arrival: <strong>${o.estimatedTime}</strong></div>` : '';
+
+                            const deliveryArea = (o.deliveryInfo) ? `
+                                <div class="o-delivery-note">
+                                    <strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.77 7.77 5.5 5.5 0 0 1 7.77-7.77zm0 0L22 22"/></svg> GLOBAL DELIVERY NOTES</strong>
+                                    <code>${o.deliveryInfo.replace(/\n/g, '<br>')}</code>
+                                    <p style="font-size:0.65rem; color:var(--text-dim); margin-top:10px;">* Please check both item-specific and global notes for your credentials.</p>
+                                </div>
+                            ` : '';
+
+                            return `
+                                <div class="order-card" id="order-${o.id}">
+                                    <div class="order-header">
+                                        <div>
+                                            <span class="order-id">#${o.id.slice(0, 8).toUpperCase()}</span>
+                                            <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">${subInfo} ${estTime}</div>
+                                        </div>
+                                        <span class="order-status status-${status}">${STATUS_LABELS[status]}</span>
+                                    </div>
+                                    <div class="order-body">${itemsHtml}</div>
+                                    ${deliveryArea}
+                                    <div class="order-footer">
+                                        <span class="o-date">${formatDate(o.createdAt)}</span>
+                                        <div style="display:flex; align-items:center; gap:16px;">
+                                            ${status !== 'pending' ? `<button class="o-action-btn" onclick="window.prepareReceipt('${o.id}')" style="padding:6px 12px; border-radius:8px;">Print Receipt</button>` : ''}
+                                            <span class="o-total">৳${(o.totalAmount || 0).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        }).join('');
+
+                        // Add "Shop More" at the bottom of the list
+                        ordersList.innerHTML += `
+                            <div style="text-align:center; padding: 2rem 0; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.05);">
+                                <a href="/store" class="shop-btn" style="text-decoration:none; display:inline-block; font-size:1rem; padding:12px 30px;">Shop More Assets</a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    if (ordersEmpty) ordersEmpty.classList.remove('hidden');
+                    if (recentOrdersCard) recentOrdersCard.classList.add('hidden');
+                    const noOrdersCard = document.getElementById('noOrdersCard');
+                    if (noOrdersCard) noOrdersCard.classList.remove('hidden');
+                }
+            } catch (err) { 
+                console.error('Data loading error:', err);
+                if (ordersLoading) ordersLoading.classList.add('hidden');
+            }
+        };
+
+        (window as any).prepareReceipt = (orderId: string) => {
+            const order = (window as any)._allOrders?.find((o: any) => o.id === orderId);
+            if (!order) return;
+            
+            const printArea = document.getElementById('receipt-print-wrapper');
+            if (!printArea) return;
+
+            const itemsRows = (order.items || []).map((i: any) => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 700;">${i.title}</div>
+                        <div style="font-size: 0.7rem; color: #666; margin-top:2px;">Type: ${i.variant || 'Standard Asset'}</div>
+                    </td>
+                    <td>৳${(i.price || 0).toLocaleString()}</td>
+                    <td>${i.quantity || 1}</td>
+                    <td style="text-align:right; font-weight: 700;">৳${((i.price || 0) * (i.quantity || 1)).toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            printArea.innerHTML = `
+                <div class="r-header">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="/assets/images/logo.svg" class="r-logo" onerror="this.src='/assets/images/logo-placeholder.svg'">
+                        <div style="font-weight: 900; font-size: 1.5rem; letter-spacing: -1px;">ARCZEN</div>
+                    </div>
+                    <div class="r-title">OFFICIAL RECEIPT</div>
+                </div>
+                
+                <div class="r-grid">
+                    <div>
+                        <div class="r-label">ACCOUNT HOLDER</div>
+                        <div class="r-val" style="font-size: 1.1rem; font-weight: 800; color: #000;">${order.customerName || 'N/A'}</div>
+                        <div class="r-val" style="margin-top: 4px;">${order.customerEmail || ''}</div>
+                        <div class="r-val">${order.customerPhone || ''}</div>
+                        <div class="r-val" style="color: #666; font-size: 0.7rem; margin-top: 8px;">ADDRESS: ${order.deliveryAddress || 'DIGITAL DELIVERY'}</div>
+                    </div>
+                    <div>
+                        <div class="r-label">BILLING & SETTLEMENT</div>
+                        <div class="r-val"><strong>TRX ID:</strong> <span style="font-family:monospace;">${order.paymentTrxId || 'N/A'}</span></div>
+                        <div class="r-val"><strong>METHOD:</strong> ${order.paymentMethod?.toUpperCase() || 'N/A'}</div>
+                        <div class="r-val"><strong>ORDER ID:</strong> #${order.id.slice(0, 12).toUpperCase()}</div>
+                    </div>
+                </div>
+
+                <div class="r-grid" style="margin-top:-20px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                    <div>
+                        <div class="r-label">ORDER GENERATED</div>
+                        <div class="r-val">${formatDate(order.createdAt)}</div>
+                    </div>
+                    <div>
+                        <div class="r-label">VERIFICATION DATE</div>
+                        <div class="r-val">${order.updatedAt ? formatDate(order.updatedAt) : 'Pending Settlement'}</div>
+                    </div>
+                </div>
+
+                <table class="r-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Product Asset Details</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th style="text-align:right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemsRows}</tbody>
+                </table>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <div style="max-width: 300px;">
+                        <div class="r-label" style="margin-bottom: 8px;">OFFICIAL STATEMENT</div>
+                        <p style="font-size: 0.7rem; color: #444; line-height: 1.5;">Thank you for conducting business with ArcZen. This receipt serves as your official proof of purchase for the listed digital assets. For any support inquiries, please contact our terminal via live chat or email.</p>
+                        <div style="font-weight: 800; font-size: 0.8rem; margin-top: 12px; color: #00C9BC;">WWW.ARCZEN.COM</div>
+                    </div>
+                    <div class="r-summary">
+                        <div class="r-sum-row">
+                            <span style="color:#666">Order Subtotal</span>
+                            <span>৳${(order.subtotal || order.amount).toLocaleString()}</span>
+                        </div>
+                        <div class="r-sum-row">
+                            <span style="color:#666">Service & Processing</span>
+                            <span>৳${(order.processingCharge || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="r-sum-row r-total">
+                            <span>TOTAL SETTLEMENT</span>
+                            <span>৳${(order.totalAmount || order.amount).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="r-footer">
+                    <div style="font-weight: 800; color: #000; margin-bottom: 5px;">ARCZEN DIGITAL ASSETS | AG_SYSTEM_RECEIPT_V2</div>
+                    <p>Generated on ${new Date().toLocaleString()} | NODE_LOG: ${order.id}</p>
+                    <p style="margin-top: 10px; font-weight: 700;">THANK YOU FOR CHOOSING ARCZEN</p>
+                </div>
+            `;
+
+            window.print();
+        };
+
+        // 4. Handle Success Redirect Info
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === '1') {
+            const banner = document.getElementById('orderSuccessCelebration');
+            const orderIdSpan = document.getElementById('successOrderId');
+            if (banner) banner.classList.remove('hidden');
+            if (orderIdSpan) orderIdSpan.textContent = `#${(params.get('id') || '').slice(0, 8).toUpperCase()}`;
+            
+            // Clean up URL without reload
+            const newUrl = window.location.pathname + (params.get('tab') ? `?tab=${params.get('tab')}` : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        loadProfileData();
+
+        // Save Profile
+        document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn') as HTMLButtonElement;
+            const btnText = document.getElementById('saveBtnText')!;
+            
+            const first = (document.getElementById('firstName') as HTMLInputElement).value.trim();
+            const last  = (document.getElementById('lastName') as HTMLInputElement).value.trim();
+            const country = (document.getElementById('countryCode') as HTMLSelectElement).value;
+            const phone   = (document.getElementById('phone') as HTMLInputElement).value.trim();
+            
+            btn.disabled = true;
+            btnText.textContent = 'Saving...';
+
+            try {
+                const profileData: any = {
+                    phone: phone ? `${country} ${phone}` : '',
+                    addresses: currentAddresses,
+                    updatedAt: serverTimestamp()
+                };
+
+                // Check if name changed
+                const newName = `${first} ${last}`.trim();
+                const oldName = originalProfile?.name || user.displayName || '';
+                
+                if (newName !== oldName) {
+                    profileData.firstName = first;
+                    profileData.lastName = last;
+                    profileData.name = newName;
+                    profileData.lastNameChange = serverTimestamp(); // Required by rules
+                }
+
+                await setDoc(doc(clientDb, 'customers', user.uid), profileData, { merge: true });
+                if (profileData.name) await updateProfile(user, { displayName: profileData.name });
+                
+                // Refresh UI
+                const finalSnap = await getDoc(doc(clientDb, 'customers', user.uid));
+                updateUIWithData(finalSnap.data());
+
+                const switchTab = (tabId: string) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.pnav-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
+            
+            // Fix header overlap on desktop when switching tabs
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+                logActivity('profile_updated', { page: '/account/profile' });
+                document.getElementById('saveSuccess')?.classList.remove('hidden');
+                setTimeout(() => document.getElementById('saveSuccess')?.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error('Save error:', err);
+                document.getElementById('saveError')?.classList.remove('hidden');
+                setTimeout(() => document.getElementById('saveError')?.classList.add('hidden'), 4000);
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Save Changes';
+            }
+        });
+
+        // Change Password Form
+        document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPass = (document.getElementById('currentPassword') as HTMLInputElement).value;
+            const newPass = (document.getElementById('newPassword') as HTMLInputElement).value;
+            const btn = (e.target as HTMLFormElement).querySelector('button');
+            if (!btn) return;
+            
+            if (newPass.length < 6) { alert('New password must be at least 6 characters.'); return; }
+            
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const credential = EmailAuthProvider.credential(user.email!, currentPass);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPass);
+                logActivity('password_changed', { page: '/account/profile' });
+                alert('Password updated successfully!');
+                (e.target as HTMLFormElement).reset();
+            } catch (err: any) {
+                console.error('Password error:', err);
+                if (err.code === 'auth/wrong-password') alert('Current password is incorrect.');
+                else alert('Failed to update password: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+            }
+        });
+
+        // Other handlers
+        document.getElementById('signOutBtn')?.addEventListener('click', async () => {
+            logActivity('logout', { page: '/account/profile' });
+            // Brief delay to allow the log request to fire before navigating
+            await new Promise(r => setTimeout(r, 300));
+            await signOut(clientAuth);
+            window.location.replace('/');
+        });
+        document.getElementById('sendResetBtn')?.addEventListener('click', () => {
+            if (user.email) {
+                sendPasswordResetEmail(clientAuth, user.email).then(() => {
+                    logActivity('password_reset_requested', { page: '/account/profile' });
+                    document.getElementById('resetSent')?.classList.remove('hidden');
+                });
+            }
+        });
+    });
+</script>
+
+<div id="receipt-print-wrapper" class="print-only" style="display:none;"></div>
+
+<Footer />
+<style>
+    @media print {
+        #receipt-print-wrapper { display: block !important; }
+    }
+</style>
+</Layout>
