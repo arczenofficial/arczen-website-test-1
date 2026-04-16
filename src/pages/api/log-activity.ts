@@ -45,6 +45,13 @@ const ALLOWED_TYPES = new Set([
     'wishlist_added',
     'wishlist_removed',
 
+    // Generic Interactions (Expanded)
+    'click',                // Track clicks on buttons/links
+    'page_view',            // Enhanced page view
+    'navigation',           // Track internal link navigation
+    'form_submit',          // Generic form submission tracking
+    'error_occurred',       // Track client-side errors for debugging
+
     // Orders
     'checkout_started',
     'checkout_completed',
@@ -67,10 +74,19 @@ const ALLOWED_META_KEYS = new Set([
     'tab',              // Active tab within a page
     'referrer',         // Previous page URL
 
+    // Granular Interactions
+    'elementId',        // ID of the clicked element
+    'elementText',      // Text content of the clicked element
+    'href',             // Link target
+    'formId',           // ID of the submitted form
+    'errorMsg',         // Error message if an error occurred
+
     // Products
     'productId',
     'productName',
     'productCategory',
+    'price',
+    'variant',
     'searchQuery',      // What the user searched for
 
     // Orders
@@ -78,6 +94,7 @@ const ALLOWED_META_KEYS = new Set([
     'orderStatus',      // Status at the time of the event
     'amount',
     'currency',
+    'totalItems',
 
     // Profile / Settings updates
     'updatedFields',    // Comma-separated list of fields changed, e.g. "phone,address"

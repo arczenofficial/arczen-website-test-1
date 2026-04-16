@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import CartDrawer from '../../components/CartDrawer.astro';
+import '../../styles/auth.css';
 ---
 
 <Layout title="Create Account — ArcZen" description="Join ArcZen to track your orders and manage your profile.">
@@ -37,7 +38,7 @@ import CartDrawer from '../../components/CartDrawer.astro';
 
                 <div id="authError" class="auth-error hidden"></div>
                 <!-- onsubmit=return false prevents any native form submission -->
-                <form id="registerForm" class="auth-form" method="POST" onsubmit="return false">
+                <form id="registerForm" class="auth-form" onsubmit="return false">
                     <div class="field-group">
                         <label for="name">Full Name</label>
                         <input type="text" id="name" required placeholder="Your name" autocomplete="name" />
@@ -83,42 +84,16 @@ import CartDrawer from '../../components/CartDrawer.astro';
     <Footer />
 </Layout>
 
-<style is:global>
-    .auth-page {
-        padding: 8rem 1.5rem 6rem;
-        background: radial-gradient(ellipse at 50% 0%, rgba(198,167,94,0.06) 0%, transparent 60%);
-    }
-    .auth-page .container { display: flex; flex-direction: column; align-items: center; }
-    .auth-card {
-        width: 100%; max-width: 420px;
-        background: rgba(26,23,20,0.8); backdrop-filter: blur(20px);
-        border: 1px solid rgba(198,167,94,0.1); border-radius: 20px;
-        padding: 2.5rem 2rem;
-        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
-    }
-    .auth-brand { text-align: center; margin-bottom: 2rem; }
-    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #f5f2eb; margin: 0; }
-    .auth-sub { color: #9a9387; font-size: 0.9rem; margin-top: 0.25rem; }
-    .google-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 0.8rem; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: #f5f2eb; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-    .google-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
-    .auth-divider { display: flex; align-items: center; gap: 12px; color: #9a9387; font-size: 0.8rem; margin: 1.5rem 0; }
-    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: rgba(198,167,94,0.15); }
-    .auth-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
-    .auth-error.hidden { display: none; }
-    .auth-form { display: flex; flex-direction: column; gap: 1rem; }
-    .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
-    .field-group label { font-size: 0.82rem; font-weight: 600; color: #c6a75e; }
-    .optional { color: #9a9387; font-weight: 400; }
-    .field-group input { padding: 0.75rem 1rem; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(198,167,94,0.12); border-radius: 10px; color: #f5f2eb; font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s; outline: none; }
-    .field-group input:focus { border-color: rgba(198,167,94,0.4); background: rgba(255,255,255,0.06); }
-    .primary-btn { width: 100%; padding: 0.85rem; border-radius: 12px; border: none; background: linear-gradient(135deg, #c6a75e 0%, #e8c87a 100%); color: #1a1200; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; font-family: inherit; margin-top: 0.5rem; }
-    .primary-btn:hover { box-shadow: 0 8px 24px rgba(198,167,94,0.4); transform: translateY(-1px); }
-    .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .auth-footer { text-align: center; color: #9a9387; font-size: 0.85rem; margin-top: 1.5rem; }
-    .auth-footer a { color: #c6a75e; }
-    .auth-footer a:hover { color: #e8c87a; }
+<style>
+    /* Content is now in auth.css */
     .phone-input-group { display: flex; gap: 8px; }
-    .country-select { width: 110px; padding: 0.75rem 0.5rem; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(198,167,94,0.12); border-radius: 10px; color: #f5f2eb; font-size: 0.85rem; outline: none; cursor: pointer; }
+    .country-select { 
+        width: 110px; padding: 0.75rem 0.5rem; 
+        background: rgba(255,255,255,0.04); 
+        border: 1.5px solid rgba(198,167,94,0.12); 
+        border-radius: 10px; color: #f5f2eb; 
+        font-size: 0.85rem; outline: none; cursor: pointer; 
+    }
     .country-select:focus { border-color: rgba(198,167,94,0.4); }
     .phone-input-group input { flex: 1; }
     .field-error { font-size: 0.75rem; color: #f87171; margin-top: 0.3rem; font-weight: 600; }

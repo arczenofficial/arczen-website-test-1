@@ -285,6 +285,16 @@
             quantity: 1
         });
         
+        // Log Add to Cart activity
+        if (typeof (window as any).logActivity === 'function') {
+            (window as any).logActivity('cart_added', {
+                productId,
+                productName: currentProduct.title,
+                price: price,
+                variant: selectedVariant ? selectedVariant.label : 'Standard'
+            });
+        }
+        
         closeProductModal();
     }
 

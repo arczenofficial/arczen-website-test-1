@@ -64,7 +64,10 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://arczen.store';
     <!-- Anonymous visitor/session tracker removed as it was missing -->
 
     <script>
-        // Scroll reveal logic from index.html extended for Astro routing
+        import { clientAuth, logActivity } from '../lib/firebase-client';
+        import { onAuthStateChanged } from 'firebase/auth';
+
+        // Scroll reveal logic
         document.addEventListener('DOMContentLoaded', () => {
             const reveals = document.querySelectorAll('.reveal');
             const revealOnScroll = () => {
@@ -78,7 +81,52 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://arczen.store';
                 });
             };
             window.addEventListener('scroll', revealOnScroll);
-            revealOnScroll(); // trigger on load
+            revealOnScroll();
+        });
+
+        // ─── Automatic Activity Tracking ───
+        let lastUrl = window.location.pathname;
+
+        async function initTracker() {
+            // 1. Initial Page View
+            logActivity('page_view', { 
+                page: window.location.pathname,
+                referrer: document.referrer 
+            });
+
+            // 2. Track Navigation (for SPAs / View Transitions if added later)
+            setInterval(() => {
+                if (window.location.pathname !== lastUrl) {
+                    lastUrl = window.location.pathname;
+                    logActivity('page_view', { page: lastUrl });
+                }
+            }, 2000);
+
+            // 3. Track Clicks globally
+            document.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement;
+                const tracker = target.closest('button, a, [data-track]');
+                
+                if (tracker) {
+                    const id = tracker.id || tracker.getAttribute('data-track');
+                    const text = tracker.innerText?.trim().substring(0, 50);
+                    const href = (tracker as HTMLAnchorElement).href;
+
+                    logActivity('click', {
+                        page: window.location.pathname,
+                        elementId: id || 'anonymous_element',
+                        elementText: text || 'no_text',
+                        href: href || 'no_href'
+                    });
+                }
+            }, true);
+        }
+
+        // Only track if user is logged in
+        onAuthStateChanged(clientAuth, (user) => {
+            if (user) {
+                initTracker();
+            }
         });
     </script>
 </body>

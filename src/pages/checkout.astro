@@ -680,6 +680,17 @@ import CartDrawer from '../components/CartDrawer.astro';
 
             // Remove only the ordered items — other cart items remain
             removeOrderedItems(orderedItemIds);
+            
+            // Log Order Place activity
+            if (typeof (window as any).logActivity === 'function') {
+                (window as any).logActivity('order_placed', {
+                    orderId: result.orderId,
+                    totalItems: items.length,
+                    currency: currency,
+                    method: selectedMethod
+                });
+            }
+            
             window.location.href = `/account/profile?tab=orders&success=1&id=${result.orderId}`;
 
         } catch(err: any) {
