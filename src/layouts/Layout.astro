@@ -1,5 +1,4 @@
 ---
-import '../styles/global.css';
 
 interface Props {
     title?: string;
@@ -33,6 +32,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://arczen.store';
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
 
+    <link rel="stylesheet" href="/styles/global.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -59,6 +59,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://arczen.store';
     })} />
 </head>
 <body>
+    <div id="antigravity-fix-marker" style="display:none;">STYLES FIXED v1</div>
     <slot />
 
     <!-- Anonymous visitor/session tracker removed as it was missing -->

@@ -26,7 +26,8 @@ const DEFAULT_SETTINGS = {
     defaultTerms: "System settlements are final. Access codes delivered post-confirmation.",
     defaultCurrency: "BDT",
     currencySymbol: "৳",
-    maintenanceMode: false
+    maintenanceMode: false,
+    appsScriptUrl: ""
 };
 
 // Cached settings
@@ -102,40 +103,59 @@ export async function renderCompanySettingsPage() {
                     <!-- Core Identity -->
                     <div class="premium-card">
                         <div class="card-header-v2"><h3><i class="ph ph-fingerprint"></i> CORE IDENTITY</h3></div>
-                        <div style="padding:20px;">
+                        <div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
                             <div class="input-group-v2">
                                 <label>TRADING NAME</label>
                                 <input type="text" id="companyName" value="${settings.name}" class="terminal-input" required>
                             </div>
-                            <div class="input-group-v2" style="margin-top:16px;">
+                            <div class="input-group-v2">
                                 <label>TAGLINE / SLOGAN</label>
                                 <input type="text" id="companyTagline" value="${settings.tagline || ''}" class="terminal-input">
                             </div>
-                            <div class="input-group-v2" style="margin-top:16px;">
+                            <div class="input-group-v2">
                                 <label>LOGO RESOURCE URL</label>
                                 <input type="text" id="companyLogo" value="${settings.logoUrl || ''}" class="terminal-input">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Operational Toggles -->
-                    <div class="premium-card">
-                        <div class="card-header-v2"><h3><i class="ph ph-toggle-left"></i> OPERATIONAL STATUS</h3></div>
-                        <div style="padding:20px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bg-deep); border-radius:12px; border:1px solid var(--border);">
-                                <div>
-                                    <div style="font-weight:700; font-size:0.85rem;">MAINTENANCE_MODE</div>
-                                    <div style="font-size:0.7rem; color:var(--text-dim);">Lock public store for maintenance</div>
+                    <!-- Operational & Environment -->
+                    <div style="display:flex; flex-direction:column; gap:24px;">
+                        <div class="premium-card">
+                            <div class="card-header-v2"><h3><i class="ph ph-toggle-left"></i> OPERATIONAL STATUS</h3></div>
+                            <div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid var(--border);">
+                                    <div>
+                                        <div style="font-weight:700; font-size:0.85rem; color:var(--text-main);">MAINTENANCE_MODE</div>
+                                        <div style="font-size:0.7rem; color:var(--text-dim);">Lock public store for maintenance</div>
+                                    </div>
+                                    <input type="checkbox" id="maintenanceMode" ${settings.maintenanceMode ? 'checked' : ''}>
                                 </div>
-                                <input type="checkbox" id="maintenanceMode" ${settings.maintenanceMode ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent);">
+                                
+                                <div class="input-group-v2">
+                                    <label>GLOBAL SETTLEMENT CURRENCY</label>
+                                    <select id="defaultCurrency" class="terminal-input">
+                                        <option value="BDT" ${settings.defaultCurrency === 'BDT' ? 'selected' : ''}>৳ BDT (Taka)</option>
+                                        <option value="USD" ${settings.defaultCurrency === 'USD' ? 'selected' : ''}>$ USD (Dollar)</option>
+                                    </select>
+                                </div>
                             </div>
-                            
-                            <div class="input-group-v2" style="margin-top:24px;">
-                                <label>GLOBAL SETTLEMENT CURRENCY</label>
-                                <select id="defaultCurrency" class="terminal-input">
-                                    <option value="BDT" ${settings.defaultCurrency === 'BDT' ? 'selected' : ''}>৳ BDT (Taka)</option>
-                                    <option value="USD" ${settings.defaultCurrency === 'USD' ? 'selected' : ''}>$ USD (Dollar)</option>
-                                </select>
+                        </div>
+
+                        <!-- System Environment Status -->
+                        <div class="premium-card" style="border-left: 3px solid var(--accent);">
+                            <div class="card-header-v2"><h3><i class="ph ph-cpu"></i> SYSTEM ENVIRONMENT</h3></div>
+                            <div style="padding:20px;">
+                                <div style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;">
+                                    <div style="width:10px; height:10px; border-radius:50%; background:${window.CuteState?.APPSCRIPT_URL ? 'var(--success)' : 'var(--danger)'}; box-shadow:0 0 10px ${window.CuteState?.APPSCRIPT_URL ? 'var(--success)' : 'var(--danger)'};"></div>
+                                    <div>
+                                        <div style="font-size:0.65rem; font-weight:800; color:var(--text-dim); text-transform:uppercase;">Telegram Bridge Status</div>
+                                        <div style="font-size:0.8rem; font-family:'JetBrains Mono'; color:var(--text-main);">${window.CuteState?.APPSCRIPT_URL ? 'ACTIVE (Environment Driven)' : 'INACTIVE (No .env Token)'}</div>
+                                    </div>
+                                </div>
+                                <p style="font-size:0.65rem; color:var(--text-dim); margin-top:12px; line-height:1.4;">
+                                    The Telegram Notification Bridge is now managed via secure Environment Variables (.env) for enhanced security and deployment stability.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -144,25 +164,25 @@ export async function renderCompanySettingsPage() {
                 <!-- Financial Parameters -->
                 <div class="premium-card" style="margin-top:24px;">
                     <div class="card-header-v2"><h3><i class="ph ph-currency-circle-dollar"></i> FINANCIAL PARAMS & GATEWAY FEES</h3></div>
-                    <div style="padding:20px; display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
+                    <div style="padding:24px; display:grid; grid-template-columns: repeat(3, 1fr); gap:24px;">
                         <div class="input-group-v2">
                             <label>FX BASE (USD/BDT)</label>
                             <input type="number" id="bdtUsdRate" value="${settings.bdtUsdRate || 120}" class="terminal-input" step="0.01">
                         </div>
                         <div class="input-group-v2">
-                            <label>INTL FEE (%)</label>
+                            <label>INTL PAYMENT FEE (%)</label>
                             <input type="number" id="usdPaymentFee" value="${settings.usdPaymentFee || 0}" class="terminal-input" step="0.1">
                         </div>
                         <div class="input-group-v2">
-                            <label>MOBILE FEE (%)</label>
+                            <label>MOBILE BANKING FEE (%)</label>
                             <input type="number" id="bkashFee" value="${settings.bkashFee || 1.85}" class="terminal-input" step="0.1">
                         </div>
                     </div>
                 </div>
 
-                <div class="form-actions" style="margin-top:32px; display:flex; justify-content:flex-end;">
-                    <button type="submit" class="premium-btn primary" style="padding: 12px 32px; font-weight:800;">
-                        <i class="ph ph-floppy-disk"></i> COMMIT CHANGES
+                <div class="form-actions" style="margin-top:40px; display:flex; justify-content:flex-end;">
+                    <button type="submit" class="premium-btn primary" style="padding: 14px 48px; border-radius:12px;">
+                        <i class="ph-bold ph-floppy-disk"></i> COMMIT SYSTEM CHANGES
                     </button>
                 </div>
             </form>
@@ -179,7 +199,7 @@ export async function renderCompanySettingsPage() {
             defaultCurrency: document.getElementById('defaultCurrency').value,
             bdtUsdRate: parseFloat(document.getElementById('bdtUsdRate').value) || 120,
             usdPaymentFee: parseFloat(document.getElementById('usdPaymentFee').value) || 0,
-            bkashFee: parseFloat(document.getElementById('bkashFee').value) || 0,
+            bkashFee: parseFloat(document.getElementById('bkashFee').value) || 0
         };
         await updateCompanySettings(updates);
     });

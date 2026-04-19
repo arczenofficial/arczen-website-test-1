@@ -14,7 +14,9 @@ const STATUS_CONFIG = {
     in_progress: { label: 'PROCESSING', icon: 'ph-gear-six', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)' },
     delivered:   { label: 'SETTLED', icon: 'ph-check-circle', color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.1)' },
     partial:     { label: 'PARTIAL', icon: 'ph-selection-plus', color: '#facc15', bg: 'rgba(250, 204, 21, 0.1)' },
-    cancelled:   { label: 'VOIDED', icon: 'ph-prohibit', color: 'var(--danger)', bg: 'rgba(239, 68, 68, 0.1)' }
+    cancelled:   { label: 'VOIDED', icon: 'ph-prohibit', color: 'var(--danger)', bg: 'rgba(239, 68, 68, 0.1)' },
+    mismatch:    { label: 'MISMATCH', icon: 'ph-warning', color: '#f87171', bg: 'rgba(248, 113, 113, 0.1)' },
+    unverified:  { label: 'UNVERIFIED', icon: 'ph-shield-warning', color: '#fca5a5', bg: 'rgba(252, 165, 165, 0.1)' }
 };
 
 export async function renderOrdersPage() {
@@ -254,37 +256,52 @@ function openOrderModal(o) {
     let operationalBlock = '';
     
     // SCENARIO 1: MANUAL PAYMENT VERIFICATION
-    if (o.status === 'pending') {
+    if (o.status === 'pending' || o.status === 'mismatch' || o.status === 'unverified') {
         operationalBlock = `
             <div class="dashboard-section" style="border-color: var(--warning); background: rgba(245, 158, 11, 0.05);">
                 <span class="section-label" style="color:var(--warning)">SCENARIO: PENDING_VERIFICATION</span>
-                <p style="font-size:0.75rem; margin-bottom:16px;">This signal requires manual payment verification. Enter the Transaction ID from your payment terminal to confirm and log the verifier.</p>
+                <p style="font-size:0.75rem; margin-bottom:16px;">This signal requires manual payment verification. Enter the Transaction ID from your terminal to match with user input.</p>
 
                 <div style="margin-bottom:14px;">
-                    <span class="dim-label" style="font-size:0.65rem;">TRANSACTION_ID (from your terminal)</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="dim-label" style="font-size:0.65rem;">TRANSACTION_ID (from your terminal)</span>
+                        ${o.paymentTrxId ? `<span style="font-size:0.6rem; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; font-family:monospace;">EXPECTED: ${o.paymentTrxId}</span>` : ''}
+                    </div>
                     <div style="display:flex; gap:8px; margin-top:6px;">
                         <input
                             id="verifyTrxInput"
                             type="text"
                             class="editable-input-v3"
                             placeholder="e.g. TRX-2024-XXXXXX"
-                            value="${o.paymentTrxId || ''}"
                             style="flex:1; font-family:'JetBrains Mono',monospace; font-size:0.8rem;"
                         />
                     </div>
                 </div>
 
+                <div id="verifyOutcomeArea" style="display:none; margin-bottom:16px; padding:12px; border-radius:8px; font-size:0.75rem;">
+                    <!-- Outcome message injected here -->
+                </div>
+
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <button class="premium-btn primary" onclick="window.verifyPaymentWithTrx('${o.id}', '${o.fullPath}')" style="background:var(--accent); color:#000;">
-                        <i class="ph ph-shield-check"></i> VERIFY &amp; MARK RECEIVED
+                    <button id="primaryVerifyBtn" class="premium-btn primary" onclick="window.verifyPaymentWithTrx('${o.id}', '${o.fullPath}')" style="background:var(--accent); color:#000;">
+                        <i class="ph ph-shield-check"></i> RUN_VERIFICATION
                     </button>
                     <button class="premium-btn" onclick="window.updateTerminalStatus('${o.id}', 'cancelled', '${o.fullPath}')" style="background:var(--danger); border:none; color:#fff;">
                         <i class="ph ph-prohibit"></i> VOID_SIGNAL
                     </button>
                 </div>
 
+                <div id="actionOverrideArea" style="display:none; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px;">
+                    <button class="premium-btn" onclick="window.markAsUnverified('${o.id}', '${o.fullPath}')" style="background:rgba(239,68,68,0.2); border:1px solid var(--danger); color:var(--danger); font-size:0.7rem;">
+                        <i class="ph ph-shield-warning"></i> MARK_UNVERIFIED
+                    </button>
+                    <button class="premium-btn" onclick="window.overrideVerification('${o.id}', '${o.fullPath}', document.getElementById('verifyTrxInput').value)" style="background:rgba(0,201,188,0.2); border:1px solid var(--accent); color:var(--accent); font-size:0.7rem;">
+                        <i class="ph ph-shield-plus"></i> MANUALLY_OVERRIDE
+                    </button>
+                </div>
+
                 <div style="margin-top:12px; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:0.7rem; color:var(--text-dim);">
-                    <i class="ph ph-info"></i> Verifier will be logged as: <strong style="color:var(--text-main);">${window.CuteState?.user?.email || 'Unknown'}</strong>
+                    <i class="ph ph-info"></i> Verifier terminal active: <strong style="color:var(--text-main);">${window.CuteState?.user?.email || 'Unknown'}</strong>
                 </div>
             </div>
         `;
@@ -611,15 +628,55 @@ document.addEventListener('click', async (e) => {
     }
 });
 
-// Verify payment with TrxID and log to finance_verifications
+// Verify payment with TrxID and perform auto-matching
 window.verifyPaymentWithTrx = async (orderId, path) => {
     const txnInput = document.getElementById('verifyTrxInput');
+    const outcomeArea = document.getElementById('verifyOutcomeArea');
+    const overrideArea = document.getElementById('actionOverrideArea');
+    const verifyBtn = document.getElementById('primaryVerifyBtn');
+    
     const txnId = txnInput?.value?.trim();
     if (!txnId) {
         showToast('Please enter the Transaction ID from your terminal.', 'warning');
         return;
     }
 
+    try {
+        // Fetch fresh order data to compare
+        const snap = await getDoc(doc(db, 'orders', orderId));
+        if (!snap.exists()) throw new Error("Order not found");
+        const o = snap.data();
+        
+        const expectedId = (o.paymentTrxId || "").trim().toUpperCase();
+        const enteredId = txnId.toUpperCase();
+        
+        outcomeArea.style.display = 'block';
+        
+        if (expectedId === enteredId) {
+            outcomeArea.style.background = 'rgba(16, 185, 129, 0.1)';
+            outcomeArea.style.border = '1px solid var(--success)';
+            outcomeArea.innerHTML = `<div style="color:var(--success); font-weight:800;"><i class="ph ph-check-circle"></i> TRANSACTION_MATCH_SUCCESS</div><p style="margin-top:4px; font-size:0.65rem;">The entered ID matches user records. Synchronizing verified state...</p>`;
+            
+            // Auto execute verification
+            await window.executePaymentVerification(orderId, path, txnId, 'Automated Match');
+        } else {
+            outcomeArea.style.background = 'rgba(239, 68, 68, 0.1)';
+            outcomeArea.style.border = '1px solid var(--danger)';
+            outcomeArea.innerHTML = `<div style="color:var(--danger); font-weight:800;"><i class="ph ph-warning-circle"></i> IDENTIFIER_MISMATCH</div><p style="margin-top:4px; font-size:0.65rem;">Entered ID does NOT match user-reported ID (${expectedId || 'NONE'}). Please check again or override manually.</p>`;
+            
+            overrideArea.style.display = 'grid';
+            verifyBtn.innerHTML = `<i class="ph ph-arrows-clockwise"></i> RE-TRY_VERIFICATION`;
+            verifyBtn.style.background = 'rgba(255,255,255,0.05)';
+            verifyBtn.style.color = '#fff';
+        }
+
+    } catch (err) {
+        console.error('[Orders] Verification check failed:', err);
+        showToast('Verification System Error', 'error');
+    }
+};
+
+window.executePaymentVerification = async (orderId, path, txnId, methodHint = 'Manual Entry') => {
     const verifiedBy = window.CuteState?.user?.email || 'SYSTEM';
 
     try {
@@ -634,7 +691,7 @@ window.verifyPaymentWithTrx = async (orderId, path) => {
                 status: 'received',
                 timestamp: new Date(),
                 by: verifiedBy,
-                msg: `Payment verified. TRX: ${txnId}`
+                msg: `Payment verified (${methodHint}). TRX: ${txnId}`
             })
         };
 
@@ -642,25 +699,60 @@ window.verifyPaymentWithTrx = async (orderId, path) => {
         batch.update(doc(db, 'orders', orderId), updateData);
         await batch.commit();
 
-        // Log to finance_verifications collection
         await addDoc(collection(db, 'finance_verifications'), {
             orderId,
             txnId,
             verifiedBy,
             verifiedAt: serverTimestamp(),
             orderPath: path,
+            method: methodHint
         });
 
-        showToast(`Payment Verified ✓ TRX: ${txnId}`, 'success');
+        showToast(`Verification Successful ✓`, 'success');
 
-        // Refresh modal
         const refreshed = await getDoc(doc(db, 'orders', orderId));
         if (refreshed.exists()) openOrderModal({ ...refreshed.data(), id: orderId, fullPath: path });
         loadOrdersTerminal();
     } catch (err) {
-        console.error('[Orders] Payment verification failed:', err);
-        showToast('Verification Failed: ' + err.message, 'error');
+        console.error('[Orders] Execution failed:', err);
+        showToast('Execution Failed', 'error');
     }
+};
+
+window.markAsUnverified = async (orderId, path) => {
+    const verifiedBy = window.CuteState?.user?.email || 'SYSTEM';
+    if (!confirm("MARK_UNVERIFIED: Signal the user that their payment could not be verified?")) return;
+
+    try {
+        const batch = writeBatch(db);
+        const updateData = {
+            status: 'unverified',
+            updatedAt: serverTimestamp(),
+            history: arrayUnion({
+                status: 'unverified',
+                timestamp: new Date(),
+                by: verifiedBy,
+                msg: `Payment unverified. Admin reports mismatch or problem with Transaction ID.`
+            })
+        };
+
+        batch.update(doc(db, path), updateData);
+        batch.update(doc(db, 'orders', orderId), updateData);
+        await batch.commit();
+
+        showToast('Order marked as Unverified', 'warning');
+
+        const refreshed = await getDoc(doc(db, 'orders', orderId));
+        if (refreshed.exists()) openOrderModal({ ...refreshed.data(), id: orderId, fullPath: path });
+        loadOrdersTerminal();
+    } catch (err) {
+        showToast('Update failed', 'error');
+    }
+};
+
+window.overrideVerification = async (orderId, path, txnId) => {
+    if (!confirm("MANUAL_OVERRIDE: Force mark this order as VERIFIED despite mismatch?")) return;
+    await window.executePaymentVerification(orderId, path, txnId || 'OVERRIDE', 'Manual Override');
 };
 
 function setupOrdersUI() {

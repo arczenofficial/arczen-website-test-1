@@ -5,7 +5,13 @@ window.CuteState = window.CuteState || {
     viewMode: null,
     userProfile: null,
     fxRate: 119.50,
-    sourcingConfig: { gatewayFee: 0.025, marketingCost: 0, includeMarketing: true }
+    sourcingConfig: { gatewayFee: 0.025, marketingCost: 0, includeMarketing: true },
+    APPSCRIPT_URL: window.__ENV__?.APPSCRIPT_URL || ""
+};
+
+// Configuration Constants
+export const CONFIG = {
+    APPSCRIPT_URL: window.__ENV__?.APPSCRIPT_URL || ""
 };
 
 // Firebase Configuration

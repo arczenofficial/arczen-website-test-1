@@ -100,6 +100,9 @@
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <!-- Config & Secrets -->
+    <script is:inline define:vars={{ PUBLIC_APPSCRIPT_URL: import.meta.env.PUBLIC_APPSCRIPT_URL }}>
+        window.__ENV__ = { APPSCRIPT_URL: PUBLIC_APPSCRIPT_URL };
+    </script>
     <script is:inline type="module" src="/assets/js/cuteadmin/config.js"></script>
     <!-- Main App -->
     <script is:inline type="module" src="/assets/js/cuteadmin/app.js"></script>
